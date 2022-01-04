@@ -1,10 +1,7 @@
 variable "PROJECT_ID" {
   type = string
 }
-variable "GOOGLE_CREDENTIALS" {
-  type      = string
-  sensitive = true
-}
+variable "GOOGLE_CREDENTIALS" {}
 locals {
   services = [
     "bigquery.googleapis.com",
