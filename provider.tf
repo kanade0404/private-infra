@@ -1,6 +1,6 @@
 provider "google" {
-  credentials = file("credential.json")
-  project     = var.project
+  credentials = var.GOOGLE_CREDENTIALS
+  project     = var.PROJECT_ID
   region      = "asia-northeast1"
   zone        = "asia-northeast1-a"
 }
