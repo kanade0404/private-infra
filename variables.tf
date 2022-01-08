@@ -19,6 +19,8 @@ locals {
     "storage-api.googleapis.com",
     "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
-    "cloudresourcemanager.googleapis.com"
+    "cloudresourcemanager.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "cloudbuild.googleapis.com"
   ]
 }
