@@ -21,6 +21,7 @@ locals {
     "serviceusage.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "cloudbuild.googleapis.com"
+    "cloudbuild.googleapis.com",
+    "cloudkms.googleapis.com"
   ]
 }
