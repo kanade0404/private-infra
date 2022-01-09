@@ -1,6 +1,9 @@
 resource "google_kms_key_ring" "infra" {
   name     = "infra"
   location = "asia-northeast1"
+  depends_on = [
+    google_project_service.service
+  ]
 }
 resource "google_kms_crypto_key" "infra" {
   name            = "infra"
