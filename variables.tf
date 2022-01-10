@@ -22,6 +22,7 @@ locals {
     "cloudresourcemanager.googleapis.com",
     "cloudfunctions.googleapis.com",
     "cloudbuild.googleapis.com",
-    "cloudkms.googleapis.com"
+    "cloudkms.googleapis.com",
+    "firestore.googleapis.com"
   ]
 }
