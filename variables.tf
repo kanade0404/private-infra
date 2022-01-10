@@ -23,6 +23,7 @@ locals {
     "cloudfunctions.googleapis.com",
     "cloudbuild.googleapis.com",
     "cloudkms.googleapis.com",
-    "firestore.googleapis.com"
+    "firestore.googleapis.com",
+    "appengine.googleapis.com"
   ]
 }
