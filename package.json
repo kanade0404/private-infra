@@ -7,7 +7,7 @@
   "devDependencies": {
     "@secretlint/secretlint-rule-preset-recommend": "4.1.4",
     "husky": "7.0.4",
-    "lint-staged": "12.2.0",
+    "lint-staged": "12.2.1",
     "secretlint": "4.1.4"
   },
   "scripts": {
