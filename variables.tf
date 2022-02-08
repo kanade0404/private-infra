@@ -47,6 +47,8 @@ locals {
     // App Engine Admin API
     "appengine.googleapis.com",
     // Firebase Rules API
-    "firebaserules.googleapis.com"
+    "firebaserules.googleapis.com",
+    // IAM Service Account Credentials API
+    "iamcredentials.googleapis.com"
   ]
 }
