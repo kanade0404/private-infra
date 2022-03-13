@@ -8,7 +8,7 @@ resource "google_project_iam_member" "scraping-zenn-impersonate" {
 }
 
 resource "google_project_iam_member" "WIPAdmin" {
-  member  = "terraform@kanade0404.iam.gserviceaccount.com"
+  member  = "serviceAccount:terraform@kanade0404.iam.gserviceaccount.com"
   project = var.PROJECT_ID
   role    = "roles/iam.workloadIdentityPoolAdmin"
 }
