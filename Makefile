@@ -8,6 +8,8 @@ setup:
 	make init
 init:
 	$(TERRAFORM) init
+upgrade:
+	$(TERRAFORM) init -upgrade
 format:
 	$(TERRAFORM) fmt -recursive
 	$(TFLINT)
