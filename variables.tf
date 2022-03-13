@@ -40,7 +40,7 @@ locals {
     "cloudresourcemanager.googleapis.com",
     // Cloud Build API
     "cloudbuild.googleapis.com",
-    // Cloud Key Management Service (KMS) API	
+    // Cloud Key Management Service (KMS) API
     "cloudkms.googleapis.com",
     // Cloud Firestore API
     "firestore.googleapis.com",
