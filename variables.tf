@@ -49,6 +49,8 @@ locals {
     // Firebase Rules API
     "firebaserules.googleapis.com",
     // IAM Service Account Credentials API
-    "iamcredentials.googleapis.com"
+    "iamcredentials.googleapis.com",
+    // Identity and Access Management (IAM) API
+    "iam.googleapis.com"
   ]
 }
