@@ -1,15 +1,21 @@
-GCLOUD = docker run --rm -ti --volumes-from gcloud-kanade0404 google/cloud-sdk gcloud
+GCLOUD = docker compose run --rm gcloud
+TERRAFORM = docker compose run --rm terraform
+TFLINT  = docker compose run --rm tflint
 setup:
-	docker run -ti --name gcloud-kanade0404 google/cloud-sdk gcloud auth login
-	$(GCLOUD) config set project kanade0404
+	$(GCLOUD) auth application-default login
+	$(GCLOUD) auth login
+	make project-set
+	make init
+init:
+	$(TERRAFORM) init
 format:
-	terraform fmt -recursive
-	docker run --rm -v $(pwd):/data -t ghcr.io/terraform-linters/tflint
-	terraform validate
+	$(TERRAFORM) fmt -recursive
+	$(TFLINT)
+	$(TERRAFORM) validate
 plan:
-	terraform plan
+	$(TERRAFORM) plan
 apply:
-	terraform apply
+	$(TERRAFORM) apply
 project-set:
 	$(GCLOUD) config set project kanade0404
 project-list:
