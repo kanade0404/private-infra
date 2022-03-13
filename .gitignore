@@ -2,3 +2,4 @@
 credential.json
 **/*.tfvars
 node_modules
+.terraformrc
