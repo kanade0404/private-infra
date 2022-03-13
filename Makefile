@@ -15,7 +15,7 @@ format:
 	$(TFLINT)
 	$(TERRAFORM) validate
 plan:
-	$(TERRAFORM) plan
+	$(TERRAFORM) plan --parallelism=30
 apply:
 	$(TERRAFORM) apply
 project-set:
