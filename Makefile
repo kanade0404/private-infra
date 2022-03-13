@@ -6,8 +6,11 @@ setup:
 	$(GCLOUD) auth login
 	make project-set
 	make init
+	make login
 init:
 	$(TERRAFORM) init
+login:
+	$(TERRAFORM) login
 upgrade:
 	$(TERRAFORM) init -upgrade
 format:
