@@ -6,3 +6,9 @@ resource "google_project_iam_member" "scraping-zenn-impersonate" {
     google_iam_workload_identity_pool.github-oidc-pool
   ]
 }
+
+resource "google_project_iam_member" "WIPAdmin" {
+  member  = "terraform@kanade0404.iam.gserviceaccount.com"
+  project = var.PROJECT_ID
+  role    = "roles/iam.workloadIdentityPoolAdmin"
+}
