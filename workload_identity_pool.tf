@@ -3,7 +3,8 @@ resource "google_iam_workload_identity_pool" "github-oidc-pool" {
   workload_identity_pool_id = "github-oidc-pool"
   project                   = var.PROJECT_ID
   depends_on = [
-    google_project_service.service
+    google_project_service.service,
+    google_project_iam_member.WIPAdmin
   ]
 }
 resource "google_iam_workload_identity_pool_provider" "github-oidc-pool-provider" {
