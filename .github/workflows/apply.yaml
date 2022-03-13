@@ -1,13 +1,12 @@
-name: 'Terraform'
+name: 'Terraform CD'
 
 on:
-  pull_request:
+  push:
     branches:
       - master
 
 jobs:
   terraform:
-    name: 'Terraform'
     runs-on: ubuntu-latest
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
@@ -20,14 +19,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set environment variables
-        run: awk '{print "TERRAFORM_VERSION="$0}' .terraform-version >> $GITHUB_ENV
-
       # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       # Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format
@@ -36,3 +30,6 @@ jobs:
 
       - name: tflint
         run: docker run --rm -v $(pwd):/data -t ghcr.io/terraform-linters/tflint
+
+      - name: Terraform Apply
+        run: terraform plan
