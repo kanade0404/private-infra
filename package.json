@@ -8,7 +8,7 @@
     "@secretlint/secretlint-rule-preset-recommend": "5.1.0",
     "husky": "7.0.4",
     "lint-staged": "12.3.5",
-    "secretlint": "5.0.1"
+    "secretlint": "5.1.0"
   },
   "scripts": {
     "prepare": "husky install",
