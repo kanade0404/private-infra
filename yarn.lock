@@ -214,11 +214,6 @@
     "@secretlint/types" "^5.1.1"
     istextorbinary "^6.0.0"
 
-"@secretlint/types@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@secretlint/types/-/types-5.1.0.tgz#54d75a1bd043f64c45099f5683673e0fc5602556"
-  integrity sha512-9J1hrQDzJoauobBzn3Eh/VfCHe8iImHRFnNpjVDGGHVSQueKem5uZwnpLfp4l/JGseEwzxy9Y8/oTp9s7rrJNg==
-
 "@secretlint/types@^5.1.1":
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/@secretlint/types/-/types-5.1.1.tgz#d5ddaf3a7e08d1ea77fa03a3c5bb76314a7ca10a"
@@ -1054,9 +1049,9 @@ minimist-options@4.1.0:
     kind-of "^6.0.3"
 
 minimist@^1.2.5:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
-  integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
+  integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
 
 ms@2.1.2:
   version "2.1.2"
