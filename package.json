@@ -5,7 +5,7 @@
   "author": "kanade <melty0404@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@secretlint/secretlint-rule-preset-recommend": "5.1.0",
+    "@secretlint/secretlint-rule-preset-recommend": "5.1.1",
     "husky": "7.0.4",
     "lint-staged": "12.3.7",
     "secretlint": "5.1.0"
