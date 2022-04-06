@@ -5,7 +5,7 @@
 pre-push:
   commands:
     secretlint:
-      run: docker run -v `pwd`:`pwd` -w `pwd` --rm -it secretlint/secretlint secretlint "**/*"
+      run: DOCKER_CONTENT_TRUST=0;docker run -v `pwd`:`pwd` -w `pwd` --rm -it secretlint/secretlint secretlint "**/*"
     tfsec:
       run: docker compose exec tfgcloud tfsec .
 
