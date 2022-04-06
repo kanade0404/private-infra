@@ -1,24 +1,17 @@
 version: "3.7"
 services:
-  terraform:
-    image: hashicorp/terraform:latest
-    container_name: infra_terraform
-    working_dir: /workspace
+  tfgcloud:
+    container_name: infra_tfgcloud
+    build:
+      context: .
+      dockerfile: docker/tfgcloud/Dockerfile
+    working_dir: /private-cloud
+    tty: true
     volumes:
-      - .:/workspace:cached
-      - gcloud-config:/root/.config
-  gcloud:
-    entrypoint: "gcloud"
-    image: google/cloud-sdk:latest
-    container_name: infra_gcloud
-    working_dir: /workspace
-    volumes:
-      - .:/workspace:cached
-      - gcloud-config:/root/.config
-  tflint:
-    image: ghcr.io/terraform-linters/tflint
-    container_name: infra_tflint
-    volumes:
-      - .:/data:cached
+      - .:/private-cloud:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: bash
+    environment:
+      HOME: "/private-cloud"
 volumes:
   gcloud-config:

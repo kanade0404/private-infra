@@ -1,27 +1,34 @@
-GCLOUD = docker compose run --rm gcloud
-TERRAFORM = docker compose run --rm terraform
-TFLINT  = docker compose run --rm tflint
 setup:
-	$(GCLOUD) auth application-default login
-	$(GCLOUD) auth login
+	docker compose exec tfgcloud gcloud auth application-default login
+	docker compose exec tfgcloud gcloud auth login
 	make project-set
-	make init
 	make login
+	make init
 init:
-	$(TERRAFORM) init
+	docker compose exec tfgcloud terraform init
 login:
-	$(TERRAFORM) login
+	docker compose exec tfgcloud terraform login
 upgrade:
-	$(TERRAFORM) init -upgrade
+	docker compose exec tfgcloud terraform init -upgrade
 format:
-	$(TERRAFORM) fmt -recursive
-	$(TFLINT)
-	$(TERRAFORM) validate
+	docker compose exec tfgcloud terraform fmt -recursive
+	docker compose exec tfgcloud terraform validate
+check:
+	docker compose exec tfgcloud tflint
+	docker compose exec tfgcloud tfsec .
 plan:
-	$(TERRAFORM) plan --parallelism=30
+	docker compose exec tfgcloud terraform plan
 apply:
-	$(TERRAFORM) apply
+	docker compose exec tfgcloud terraform apply
 project-set:
-	$(GCLOUD) config set project kanade0404
+	docker compose exec tfgcloud gcloud config set project kanade0404
 project-list:
-	$(GCLOUD) config list
+	docker compose exec tfgcloud gcloud config list
+build:
+	docker compose build
+up:
+	docker compose up -d
+stop:
+	docker compose stop
+ps:
+	docker compose ps

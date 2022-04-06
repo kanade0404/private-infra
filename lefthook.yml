@@ -1,0 +1,20 @@
+# EXAMPLE USAGE
+# Refer for explanation to following link:
+# https://github.com/evilmartians/lefthook/blob/master/docs/full_guide.md
+#
+pre-push:
+  commands:
+    secretlint:
+      run: docker run -v `pwd`:`pwd` -w `pwd` --rm -it secretlint/secretlint secretlint "**/*"
+    tfsec:
+      run: docker compose exec tfgcloud tfsec .
+
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      run: docker compose exec tfgcloud terraform fmt -recursive -check
+    lint:
+      run: docker compose exec tfgcloud tflint
+    validate:
+      run: docker compose exec tfgcloud terraform validate

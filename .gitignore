@@ -1,5 +1,8 @@
 .terraform
 credential.json
 **/*.tfvars
-node_modules
 .terraformrc
+tfsec
+.bash_history
+.config
+.terraform.d
