@@ -1,6 +1,6 @@
 variable "repo-name" {
   type    = string
-  default = "Seiya-Min/private-infra"
+  default = "kanade0404/private-infra"
 }
 resource "google_service_account_iam_member" "admin-account-iam" {
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github-actions.name}/attribute.repository/${var.repo-name}"
