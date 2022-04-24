@@ -32,3 +32,5 @@ stop:
 	docker compose stop
 ps:
 	docker compose ps
+exec:
+	docker compose exec tfgcloud bash
