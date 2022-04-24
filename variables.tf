@@ -51,6 +51,8 @@ locals {
     // IAM Service Account Credentials API
     "iamcredentials.googleapis.com",
     // Identity and Access Management (IAM) API
-    "iam.googleapis.com"
+    "iam.googleapis.com",
+    // Security Token Service API
+    "sts.googleapis.com"
   ]
 }
