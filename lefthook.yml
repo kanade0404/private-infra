@@ -9,8 +9,8 @@ pre-push:
       run: DOCKER_CONTENT_TRUST=0;docker run -v `pwd`:`pwd` -w `pwd` --rm -it secretlint/secretlint secretlint "**/*"
     tfsec:
       run: docker compose exec tfgcloud tfsec .
-    actionlint:
-      run: docker compose exec tfgcloud ./actionlint
+    validate:
+      run: docker compose exec tfgcloud terraform validate
 
 pre-commit:
   parallel: true
@@ -19,5 +19,5 @@ pre-commit:
       run: docker compose exec tfgcloud terraform fmt -recursive -check
     lint:
       run: docker compose exec tfgcloud tflint
-    validate:
-      run: docker compose exec tfgcloud terraform validate
+    actionlint:
+      run: docker compose exec tfgcloud ./actionlint
