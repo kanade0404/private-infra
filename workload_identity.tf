@@ -18,6 +18,7 @@ resource "google_iam_workload_identity_pool_provider" "github-actions" {
     "attribute.repository" = "assertion.repository"
   }
   oidc {
-    issuer_uri = "https://token.actions.githubusercontent.com"
+    issuer_uri        = "https://token.actions.githubusercontent.com"
+    allowed_audiences = []
   }
 }

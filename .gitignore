@@ -6,3 +6,4 @@ tfsec
 .bash_history
 .config
 .terraform.d
+actionlint

@@ -42,8 +42,10 @@ jobs:
         run: terraform validate -no-color
 
       - name: tflint
+        uses: reviewdog/action-tflint@v1.17.0
         id: lint
-        run: docker run --rm -v $(pwd):/data -t ghcr.io/terraform-linters/tflint
+        with:
+          github_token: ${{ secrets.github_token }}
 
       - name: Terraform Plan
         id: plan
