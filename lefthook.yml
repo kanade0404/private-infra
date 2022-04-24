@@ -3,11 +3,14 @@
 # https://github.com/evilmartians/lefthook/blob/master/docs/full_guide.md
 #
 pre-push:
+  parallel: true
   commands:
     secretlint:
       run: DOCKER_CONTENT_TRUST=0;docker run -v `pwd`:`pwd` -w `pwd` --rm -it secretlint/secretlint secretlint "**/*"
     tfsec:
       run: docker compose exec tfgcloud tfsec .
+    actionlint:
+      run: docker compose exec tfgcloud ./actionlint
 
 pre-commit:
   parallel: true
