@@ -38,7 +38,6 @@ jobs:
         uses: google-github-actions/setup-gcloud@v0.6.0
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID_NUMBER }}
-          service_account_key: ${{ steps.google-cloud-auth.outputs.credentials_file_path }}
           export_default_credentials: true
 
       - name: Setup Terraform
