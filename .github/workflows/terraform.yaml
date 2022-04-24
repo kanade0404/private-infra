@@ -44,7 +44,7 @@ jobs:
       - name: tflint
         id: lint
         run: |
-        docker run --rm -v $(pwd):/data -t ghcr.io/terraform-linters/tflint
+          docker run --rm -v $(pwd):/data -t ghcr.io/terraform-linters/tflint
 
       - name: Terraform Plan
         id: plan
