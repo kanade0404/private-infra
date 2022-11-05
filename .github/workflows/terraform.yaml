@@ -42,7 +42,7 @@ jobs:
         run: terraform validate -no-color
 
       - name: tflint
-        uses: reviewdog/action-tflint@v1.17.0
+        uses: reviewdog/action-tflint@v1.17.1
         id: lint
         with:
           github_token: ${{ secrets.github_token }}
