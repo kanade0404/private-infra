@@ -1,6 +1,6 @@
 FROM hashicorp/terraform:1.4.2 AS builder
 
-FROM google/cloud-sdk:422.0.0
+FROM google/cloud-sdk:424.0.0
 
 COPY --from=builder /bin/terraform /bin/terraform
 
