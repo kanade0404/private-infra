@@ -57,6 +57,12 @@ locals {
     // Security Token Service API
     "sts.googleapis.com",
     // Application Integration API
-    "integrations.googleapis.com"
+    "integrations.googleapis.com",
+    // Cloud Run API
+    "run.googleapis.com",
+    // Connectors API
+    "connectors.googleapis.com",
+    // Secret Manager API
+    "secretmanager.googleapis.com"
   ]
 }
