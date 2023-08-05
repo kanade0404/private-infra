@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:1.4.6 AS builder
+FROM hashicorp/terraform:1.5.4 AS builder
 
 FROM google/cloud-sdk:441.0.0
 
@@ -11,4 +11,4 @@ RUN apt update && \
     chmod +x tfsec && \
     mv tfsec /usr/local/bin/tfsec
 
-ENTRYPOINT ["/bin/terraform"]
+ENTRYPOINT ["/bin/bash"]
