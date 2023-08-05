@@ -7,3 +7,5 @@ tfsec
 .config
 .terraform.d
 actionlint
+gcp-credential.json
+.aws

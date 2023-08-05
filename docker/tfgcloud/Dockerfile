@@ -11,4 +11,4 @@ RUN apt update && \
     chmod +x tfsec && \
     mv tfsec /usr/local/bin/tfsec
 
-ENTRYPOINT ["/bin/terraform"]
+ENTRYPOINT ["/bin/bash"]
