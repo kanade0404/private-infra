@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.8"
 services:
   tfgcloud:
     container_name: infra_tfgcloud
@@ -13,5 +13,6 @@ services:
     entrypoint: bash
     environment:
       HOME: "/private-cloud"
+      GOOGLE_CREDENTIALS: "/private-cloud/gcp-credential.json"
 volumes:
   gcloud-config:

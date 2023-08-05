@@ -1,7 +1,9 @@
 variable "PROJECT_ID" {
   type = string
 }
-variable "GOOGLE_CREDENTIALS" {}
+variable "GOOGLE_CREDENTIALS" {
+  type = any
+}
 locals {
   services = [
     // BigQuery API
@@ -53,6 +55,8 @@ locals {
     // Identity and Access Management (IAM) API
     "iam.googleapis.com",
     // Security Token Service API
-    "sts.googleapis.com"
+    "sts.googleapis.com",
+    // Application Integration API
+    "integrations.googleapis.com"
   ]
 }
