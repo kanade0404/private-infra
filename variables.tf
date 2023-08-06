@@ -12,8 +12,6 @@ locals {
     "bigquerystorage.googleapis.com",
     // Cloud Datastore API
     "datastore.googleapis.com",
-    // Cloud Debugger API
-    "clouddebugger.googleapis.com",
     // Cloud Functions API
     "cloudfunctions.googleapis.com",
     // Cloud Logging API
