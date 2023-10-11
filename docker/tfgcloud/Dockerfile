@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:1.5.4 AS builder
+FROM hashicorp/terraform:1.6.1 AS builder
 
 FROM google/cloud-sdk:441.0.0
 
