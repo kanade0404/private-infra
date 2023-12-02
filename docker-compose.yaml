@@ -1,10 +1,10 @@
 version: "3.8"
 services:
-  tfgcloud:
-    container_name: infra_tfgcloud
+  private_infra:
+    container_name: private_infra
     build:
       context: .
-      dockerfile: docker/tfgcloud/Dockerfile
+      dockerfile: docker/local/Dockerfile
     working_dir: /private-cloud
     tty: true
     volumes:
