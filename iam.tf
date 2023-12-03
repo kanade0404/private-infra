@@ -2,8 +2,7 @@ locals {
   username = "kanade0404"
   repositories = [
     "${local.username}/private-infra",
-    "${local.username}/ur",
-    "${local.username}/scraping-zenn",
+    "${local.username}/zaim",
   ]
 }
 resource "google_service_account_iam_member" "admin-account-iam" {

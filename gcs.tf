@@ -15,4 +15,7 @@ resource "google_storage_bucket_object" "tfstate_directory" {
   bucket   = google_storage_bucket.tfstate.id
   name     = each.value
   source   = "/${each.value}"
+  depends_on = [
+    google_storage_bucket.tfstate
+  ]
 }
