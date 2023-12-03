@@ -11,6 +11,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  pull-requests: write
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -70,4 +71,4 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: tfcmt -owner "$OWNER" -repo "$REPO" -pr "$PR_NUMBER" apply -- terraform apply -no-color -auto-approve
+        run: tfcmt apply -- terraform apply -no-color -auto-approve
