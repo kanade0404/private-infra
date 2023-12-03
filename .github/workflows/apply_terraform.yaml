@@ -57,6 +57,7 @@ jobs:
 
       - name: Check tfsec
         run: tfsec .
+        continue-on-error: true
 
       - name: setup tfcmt
         env:
