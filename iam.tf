@@ -5,8 +5,6 @@ locals {
     "${local.username}/ur",
     "${local.username}/scraping-zenn",
   ]
-  scraping_zenn = {
-  }
 }
 resource "google_service_account_iam_member" "admin-account-iam" {
   for_each           = toset(local.repositories)

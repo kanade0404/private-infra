@@ -10,3 +10,4 @@ provider "google-beta" {
   region      = "asia-northeast1"
   zone        = "asia-northeast1-a"
 }
+provider "random" {}
