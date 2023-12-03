@@ -68,5 +68,4 @@ jobs:
           tfcmt --version
 
       - name: Terraform Plan
-        id: plan
-        run: tfcmt -owner "$OWNER" plan -patch -- terraform plan
+        run: tfcmt plan -patch -- terraform plan -no-color -input=false
