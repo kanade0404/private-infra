@@ -9,5 +9,10 @@ terraform {
       source  = "hashicorp/google-beta"
       version = "5.7.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.5.1"
+    }
   }
 }
+resource "random_uuid" "uuid" {}

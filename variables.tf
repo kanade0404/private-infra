@@ -5,6 +5,7 @@ variable "GOOGLE_CREDENTIALS" {
   type = any
 }
 locals {
+  location = "asia-northeast1"
   services = [
     // BigQuery API
     "bigquery.googleapis.com",
