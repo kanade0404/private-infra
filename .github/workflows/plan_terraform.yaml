@@ -69,4 +69,4 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: tfcmt -owner "$OWNER" -repo "$REPO" -pr "$PR_NUMBER" plan -patch -- terraform plan
+        run: tfcmt -owner "$OWNER" plan -patch -- terraform plan
