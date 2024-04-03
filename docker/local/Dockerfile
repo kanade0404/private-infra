@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:1.7.4 AS terraform
+FROM hashicorp/terraform:1.7.5 AS terraform
 
 FROM ubuntu:22.04 AS base
 RUN apt update && \
