@@ -8,7 +8,7 @@ RUN apt update && \
     chmod +x tfsec && \
     mv tfsec /usr/local/bin/tfsec
 
-FROM google/cloud-sdk:486.0.0
+FROM google/cloud-sdk:489.0.0
 
 COPY --from=terraform /bin/terraform /bin/terraform
 COPY --from=base /usr/local/bin/tflint /usr/local/bin/tflint
