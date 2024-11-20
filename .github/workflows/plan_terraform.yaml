@@ -22,6 +22,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: 'Apply Start Slack Notification'
+        uses: kanade0404/slatify@v1
+        with:
+          type: success
+          username: ${{ github.workflow }}
+          icon_emoji: ':github:'
+          job_name: '*Terraform Plan Start*'
+          url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2.1.2'
@@ -70,3 +80,14 @@ jobs:
 
       - name: Terraform Plan
         run: tfcmt plan -patch -- terraform plan -no-color -input=false
+
+      - name: Slack Notification
+        uses: kanade0404/slatify@v1
+        if: always()
+        with:
+          type: ${{ job.status }}
+          username: ${{ github.workflow }}
+          icon_emoji: ':github:'
+          job_name: '*Terraform Plan Result*'
+          url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
