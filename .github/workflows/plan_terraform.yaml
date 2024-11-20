@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 'Apply Start Slack Notification'
-        uses: kanade0404/slatify@v1
+        uses: kanade0404/slatify@v1.0.0
         with:
           type: success
           username: ${{ github.workflow }}
@@ -82,7 +82,7 @@ jobs:
         run: tfcmt plan -patch -- terraform plan -no-color -input=false
 
       - name: Slack Notification
-        uses: kanade0404/slatify@v1
+        uses: kanade0404/slatify@v1.0.0
         if: always()
         with:
           type: ${{ job.status }}
