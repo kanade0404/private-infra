@@ -9,3 +9,9 @@ tfsec
 actionlint
 gcp-credential.json
 .aws
+
+# AWS stack (aws/ also has its own .gitignore)
+*.tfstate
+*.tfstate.*
+crash.log
+.direnv/
