@@ -1,0 +1,20 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      run: tofu fmt -recursive -check
+    lint:
+      run: tflint --recursive
+    validate:
+      run: |
+        for dir in environments/*/; do
+          (cd "$dir" && tofu validate) || exit 1
+        done
+
+pre-push:
+  parallel: true
+  commands:
+    secretlint:
+      run: npx secretlint "**/*"
+    trivy:
+      run: trivy config .

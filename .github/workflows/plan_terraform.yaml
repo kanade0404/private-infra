@@ -2,6 +2,9 @@ name: 'Terraform'
 
 on:
   pull_request:
+    paths:
+      - 'gcp/**'
+      - '.github/workflows/**'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -17,6 +20,7 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: gcp
 
     steps:
       - name: Checkout
@@ -42,6 +46,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
+          terraform_version: 1.11.4
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Terraform Format
@@ -61,6 +66,7 @@ jobs:
         uses: reviewdog/action-tflint@v1.24.2
         with:
           github_token: ${{ secrets.github_token }}
+          working_directory: gcp
 
       - name: Install tfsec
         run: curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash

@@ -1,7 +1,8 @@
 # private-infra
 
-## setup
+GCP と AWS のインフラを一元管理するモノレポ。
 
-```shell
-make setup
-```
+- **`gcp/`** — GCP (Terraform + Terraform Cloud)。セットアップは `cd gcp && make setup`。
+- **`aws/`** — AWS (OpenTofu + Nix)。セットアップは `cd aws && direnv allow`。
+
+各スタックは state backend が独立しており、横断する共有 state は無い。詳細は各ディレクトリの `CLAUDE.md` を参照。

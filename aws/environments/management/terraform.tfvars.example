@@ -1,0 +1,12 @@
+AWS_ACCESS_KEY_ID     = ""
+AWS_SECRET_ACCESS_KEY = ""
+
+# SSO ユーザー情報
+sso_user_display_name = "Taro Yamada"
+sso_user_given_name   = "Taro"
+sso_user_family_name  = "Yamada"
+sso_user_email        = "your-email@gmail.com"
+
+# メンバーアカウント用メール（prefix+aws-personal-dev@domain の形式で使われる）
+account_email_prefix = "your-email"
+account_email_domain = "gmail.com"
