@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.4.0
 
       - name: 'Apply Start Slack Notification'
         uses: kanade0404/slatify@v1.0.0
@@ -44,7 +44,7 @@ jobs:
           service_account: 'github-actions@kanade0404.iam.gserviceaccount.com'
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v3.1.2
         with:
           terraform_version: 1.11.4
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
