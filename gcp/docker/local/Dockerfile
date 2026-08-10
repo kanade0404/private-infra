@@ -1,6 +1,6 @@
 FROM hashicorp/terraform:1.11.4 AS terraform
 
-FROM ubuntu:24.04 AS base
+FROM ubuntu:26.04 AS base
 RUN apt update && \
     apt install -y unzip curl && \
     curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash && \
