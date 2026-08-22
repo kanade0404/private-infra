@@ -30,6 +30,17 @@
 #
 #      echo -n "<instance_id>:<api_token>" | base64
 #
+#    Cloud Run の env var 経由の secret は「インスタンス起動時」に解決され、
+#    起動済みインスタンスは値投入後も再取得しない (Google 公式ドキュメント通り。
+#    https://cloud.google.com/run/docs/configuring/services/secrets)。
+#    min_instance_count = 0 でアイドル時に自然に入れ替わるため通常は次回起動で
+#    反映されるが、即時反映させたい場合は値投入後に config を変更せず
+#    services update を実行して新しいリビジョンを強制作成する
+#    (Terraform 管理下の設定には差分を作らない):
+#
+#      docker compose exec -T private_infra gcloud run services update \
+#        otel-collector --project="$PROJECT_ID" --region="$REGION"
+#
 # 2. Claude Code 側 (dotfiles の settings.json) の OTLP エンドポイントを、
 #    この Cloud Run サービスの URL (output "otel_collector_url" 参照) に向ける。
 #    受信には RECEIVER_TOKEN の Bearer トークンが必要 (dotfiles 側の変更はスコープ外)。
