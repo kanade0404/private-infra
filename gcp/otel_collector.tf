@@ -33,13 +33,25 @@
 #    Cloud Run の env var 経由の secret は「インスタンス起動時」に解決され、
 #    起動済みインスタンスは値投入後も再取得しない (Google 公式ドキュメント通り。
 #    https://cloud.google.com/run/docs/configuring/services/secrets)。
-#    min_instance_count = 0 でアイドル時に自然に入れ替わるため通常は次回起動で
-#    反映されるが、即時反映させたい場合は値投入後に config を変更せず
-#    services update を実行して新しいリビジョンを強制作成する
-#    (Terraform 管理下の設定には差分を作らない):
 #
-#      docker compose exec -T private_infra gcloud run services update \
-#        otel-collector --project="$PROJECT_ID" --region="$REGION"
+#    - min_instance_count = 0 のため通常はインスタンスが存在せず、次のリクエストで
+#      起動する新インスタンスが secret の最新 version を解決する。多くの場合、
+#      追加の操作は不要。
+#    - 稼働中のインスタンスに確実に反映させたい場合 (token ローテーション時など)は、
+#      現在と同一のイメージを指定して gcloud run deploy を実行し、新しいリビジョンを
+#      強制作成する (config が同一でも gcloud run deploy は必ず新リビジョンを作るため、
+#      Terraform 管理下の設定に差分は生じない。gcloud run services update は設定変更
+#      フラグなしでは "nothing to update" エラーになり新リビジョンを作らないので使わない):
+#
+#      docker compose exec -T private_infra gcloud run deploy otel-collector \
+#        --image="asia-northeast1-docker.pkg.dev/$PROJECT_ID/docker-hub-remote/otel/opentelemetry-collector-contrib:0.159.0" \
+#        --region=asia-northeast1 --project="$PROJECT_ID"
+#
+#      反映確認 (latestReadyRevisionName が更新されていることを確認する):
+#
+#      docker compose exec -T private_infra gcloud run services describe otel-collector \
+#        --region=asia-northeast1 --project="$PROJECT_ID" \
+#        --format='value(status.latestReadyRevisionName)'
 #
 # 2. Claude Code 側 (dotfiles の settings.json) の OTLP エンドポイントを、
 #    この Cloud Run サービスの URL (output "otel_collector_url" 参照) に向ける。
