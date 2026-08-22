@@ -4,6 +4,11 @@ variable "PROJECT_ID" {
 variable "GOOGLE_CREDENTIALS" {
   type = any
 }
+variable "grafana_otlp_endpoint" {
+  type        = string
+  description = "Grafana Cloud スタックの OTLP gateway URL。Grafana Cloud の該当スタックの値に置き換えること。"
+  default     = "https://otlp-gateway-prod-ap-northeast-0.grafana.net/otlp"
+}
 locals {
   location = "asia-northeast1"
   services = [
@@ -59,6 +64,8 @@ locals {
     "integrations.googleapis.com",
     // Cloud Run API
     "run.googleapis.com",
+    // Artifact Registry API
+    "artifactregistry.googleapis.com",
     // Connectors API
     "connectors.googleapis.com",
     // Secret Manager API
