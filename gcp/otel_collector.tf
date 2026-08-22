@@ -11,19 +11,20 @@
 #
 # 1. Secret Manager の 3 つの secret に値を投入する (Terraform ではプレースホルダー
 #    version のみ管理する。apply 後いつでも可: プレースホルダーのままでも apply は
-#    成功し、実値投入まで Collector は各バックエンドへの送信が 401 になるだけ):
+#    成功し、実値投入まで Collector は各バックエンドへの送信が 401 になるだけ)。
+#    gcloud は Docker コンテナ経由で実行する (gcp/CLAUDE.md 参照。gcp/ で実行):
 #
 #      echo -n "<Findy AI+ の Bearer トークン>" | \
-#        gcloud secrets versions add otel-collector-findy-token \
-#        --project="$PROJECT_ID" --data-file=-
+#        docker compose exec -T private_infra gcloud secrets versions add \
+#        otel-collector-findy-token --project="$PROJECT_ID" --data-file=-
 #
 #      echo -n "<Grafana Cloud の instance_id:api_token を base64 したもの>" | \
-#        gcloud secrets versions add otel-collector-grafana-basic-auth \
-#        --project="$PROJECT_ID" --data-file=-
+#        docker compose exec -T private_infra gcloud secrets versions add \
+#        otel-collector-grafana-basic-auth --project="$PROJECT_ID" --data-file=-
 #
 #      echo -n "<Collector 受信側 (otlp receiver) の Bearer トークン>" | \
-#        gcloud secrets versions add otel-collector-receiver-token \
-#        --project="$PROJECT_ID" --data-file=-
+#        docker compose exec -T private_infra gcloud secrets versions add \
+#        otel-collector-receiver-token --project="$PROJECT_ID" --data-file=-
 #
 #    Grafana Cloud の Basic 認証値は以下で作成できる:
 #
@@ -202,6 +203,7 @@ resource "google_cloud_run_v2_service" "otel_collector" {
     google_project_service.service,
     google_artifact_registry_repository.docker_hub,
     google_secret_manager_secret_iam_member.otel_collector,
+    google_secret_manager_secret_version.otel_collector,
   ]
 }
 

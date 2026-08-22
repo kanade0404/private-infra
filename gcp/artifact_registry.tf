@@ -1,6 +1,6 @@
 # Docker Hub 向けのプルスルーキャッシュ (remote repository)。
-# Cloud Run は Docker Hub (docker.io) のイメージを直接 pull できないため、
-# Artifact Registry の remote repository を経由してイメージを取得する。
+# 公開 Docker Hub イメージは Cloud Run から直接利用できるが、
+# キャッシュと可用性のため Artifact Registry remote repository を経由して取得する。
 resource "google_artifact_registry_repository" "docker_hub" {
   project       = var.PROJECT_ID
   location      = local.location
