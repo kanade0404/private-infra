@@ -1,10 +1,8 @@
 terraform {
   required_version = "1.11.4"
-  cloud {
-    organization = "kaNade"
-    workspaces {
-      name = "private-infra-grafana"
-    }
+  backend "gcs" {
+    bucket = "tfstate-kanade0404-terraform"
+    prefix = "grafana"
   }
   required_providers {
     grafana = {
