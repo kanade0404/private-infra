@@ -12,7 +12,7 @@ login:
 	docker compose exec grafana_infra terraform login
 init:
 	docker compose exec grafana_infra terraform init
-format:
+format: init
 	docker compose exec grafana_infra terraform fmt -recursive
 	docker compose exec grafana_infra terraform validate
 plan:
