@@ -1,9 +1,6 @@
 terraform {
-  backend "remote" {
-    hostname     = "app.terraform.io"
-    organization = "kaNade"
-    workspaces {
-      name = "private-infra"
-    }
+  backend "gcs" {
+    bucket = "tfstate-kanade0404-terraform"
+    prefix = "gcp"
   }
 }

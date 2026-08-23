@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.4.0
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: 'Apply Start Slack Notification'
-        uses: kanade0404/slatify@v1.0.0
+        uses: kanade0404/slatify@49d087e4b74ccac7a1f12db94932cb87f7e759a9 # v1.0.0
         with:
           type: success
           username: ${{ github.workflow }}
@@ -38,16 +38,15 @@ jobs:
 
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v3.0.0'
+        uses: 'google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093' # v3.0.0
         with:
           workload_identity_provider: 'projects/137094135185/locations/global/workloadIdentityPools/gh-oidc-pool/providers/github-actions'
           service_account: 'github-actions@kanade0404.iam.gserviceaccount.com'
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3.1.2
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: 1.11.4
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Terraform Format
         id: fmt
@@ -63,7 +62,7 @@ jobs:
         run: terraform validate -no-color
 
       - name: tflint
-        uses: reviewdog/action-tflint@v1.25.0
+        uses: reviewdog/action-tflint@54a5e5aed57dcfbb4662ec548de876df33d6288d # v1.25.0
         with:
           github_token: ${{ secrets.github_token }}
           working_directory: gcp
@@ -88,7 +87,7 @@ jobs:
         run: tfcmt plan -patch -- terraform plan -no-color -input=false
 
       - name: Slack Notification
-        uses: kanade0404/slatify@v1.0.0
+        uses: kanade0404/slatify@49d087e4b74ccac7a1f12db94932cb87f7e759a9 # v1.0.0
         if: always()
         with:
           type: ${{ job.status }}
