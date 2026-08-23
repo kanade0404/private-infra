@@ -12,8 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3 つの独立したスタックを持つ:
 
 - **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **Terraform Cloud**（org `kaNade` / workspace `private-infra`）。Docker でツールを実行。詳細は `gcp/CLAUDE.md`。
-- **`aws/`** — AWS インフラ。**OpenTofu** 1.11.5 + **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
-- **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**OpenTofu** 1.11.5 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `grafana`）。Nix flake でツールを実行。詳細は `grafana/CLAUDE.md`。
+- **`aws/`** — AWS インフラ。**OpenTofu** 1.12.5 + **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
+- **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**OpenTofu** 1.12.5 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `grafana`）。Nix flake でツールを実行。詳細は `grafana/CLAUDE.md`。
 
 各スタックは backend が独立しており **state は完全に分離**している。スタックを横断する共有 state は存在しない。新しいリソースは対象クラウドのスタック配下に追加すること。
 
