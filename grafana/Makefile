@@ -8,8 +8,6 @@ down:
 	docker compose down
 bash:
 	docker compose exec grafana_infra sh
-login:
-	docker compose exec grafana_infra terraform login
 init:
 	docker compose exec grafana_infra terraform init
 format: init

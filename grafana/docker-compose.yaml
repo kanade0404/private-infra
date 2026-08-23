@@ -8,14 +8,13 @@ services:
     entrypoint: sh
     volumes:
       - .:/grafana-infra:cached
-      # terraform login の認証情報 (~/.terraform.d/credentials.tfrc.json) を
-      # リポジトリのbind mount配下ではなく named volume に保存する。
-      - grafana_terraform_home:/root
+      # GCS backend への認証には gcloud ADC (Application Default Credentials) を使う。
+      # ホスト側で `gcloud auth application-default login` 済みの認証情報を
+      # コンテナの HOME (/root) 配下に read-only でマウントする。
+      - ${HOME}/.config/gcloud:/root/.config/gcloud:cached,ro
     environment:
       HOME: "/root"
-      # GRAFANA_URL / GRAFANA_AUTH は TFC workspace の env 変数から供給される想定。
-      # ローカルで plan/apply する場合はシェルで export してから `docker compose up` すること。
+      # GRAFANA_URL / GRAFANA_AUTH は CI では GitHub Secrets、ローカルでは
+      # シェルで export してから `docker compose up` することで供給する。
       GRAFANA_URL: "${GRAFANA_URL}"
       GRAFANA_AUTH: "${GRAFANA_AUTH}"
-volumes:
-  grafana_terraform_home:
