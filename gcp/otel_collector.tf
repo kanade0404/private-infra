@@ -70,6 +70,8 @@
 #   相当なら不要)。
 # - Findy のエンドポイント URL (ステージパス無し) は 2026-08-22 に
 #   /v1/metrics /v1/logs への直接 POST で 200 を実測確認済み。
+# - metrics は temporality の要求差により Findy 向け / Grafana 向けでパイプラインを
+#   分けている (delta_to_cumulative processor のコメント参照)。
 # - grafana_otlp_endpoint 変数の default はサンプル値であり、自分の
 #   Grafana Cloud スタックの OTLP gateway URL に合わせて上書きが必要
 #   (未設定でも Grafana 側が 401 になるだけで Findy 転送には影響しない)。
@@ -127,12 +129,34 @@ locals {
         sending_queue:
           enabled: true
 
+    processors:
+      # Grafana Cloud (Mimir) は cumulative temporality しか受け付けず、Claude Code の
+      # OTel SDK が送る delta の Sum は HTTP 400 (invalid temporality and type
+      # combination) で全ドロップされるため、Grafana 向けだけ cumulative に変換する。
+      # (正式な type 名は delta_to_cumulative。deltatocumulative は非推奨エイリアス)
+      delta_to_cumulative:
+        # 同時に state を保持する時系列数の上限。個人テレメトリの規模には十分で、
+        # かつメモリ (limits.memory = 512Mi) の暴走を防ぐ値。
+        max_streams: 10000
+        # 更新が途絶えた時系列の state を破棄するまでの猶予。Claude Code のセッションは
+        # 断続的なので default の 5m より長めに取る。ただし min_instance_count = 0 の
+        # ためアイドルでインスタンスごと state が消える (プロセス生存期間が実質の上限)
+        # ので、これ以上長い値を設定しても意味は無い。
+        max_stale: 30m
+
     service:
       extensions: [health_check, bearertokenauth/receiver]
       pipelines:
+        # metrics はバックエンドが要求する temporality が異なるためパイプラインを分ける。
+        # Findy AI+ は delta のまま 200 で受理しているので変換せずに送る。
         metrics:
           receivers: [otlp]
-          exporters: [otlp_http/findy, otlp_http/grafana]
+          exporters: [otlp_http/findy]
+        # Grafana Cloud 向けのみ delta -> cumulative へ変換して送る。
+        metrics/grafana:
+          receivers: [otlp]
+          processors: [delta_to_cumulative]
+          exporters: [otlp_http/grafana]
         logs:
           receivers: [otlp]
           exporters: [otlp_http/findy, otlp_http/grafana]
