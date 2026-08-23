@@ -1,5 +1,5 @@
 terraform {
-  required_version = "1.11.5"
+  required_version = ">= 1.11.5"
   backend "gcs" {
     bucket = "tfstate-kanade0404-terraform"
     prefix = "grafana"
