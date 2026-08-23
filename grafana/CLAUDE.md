@@ -25,7 +25,7 @@ Grafana Cloud (kanade0404 個人スタック) のダッシュボード / リソ�
 
 - state は GCS バケット `gs://tfstate-kanade0404-terraform`（prefix `grafana`）に保存する。
 - CI (`github-actions@kanade0404.iam.gserviceaccount.com`) は Workload Identity Federation で認証し、当該バケットへの `roles/storage.objectAdmin` を保持している。
-- ローカルから `terraform plan` / `apply` する場合は、事前にホストで `gcloud auth application-default login` を実行し、Application Default Credentials (ADC) を用意しておくこと。`docker-compose.yaml` がホストの `~/.config/gcloud` をコンテナへ read-only マウントするため、コンテナ内の `terraform` はこの ADC をそのまま利用できる。
+- ローカルから `terraform plan` / `apply` する場合は、事前にホストで `gcloud auth application-default login` を実行しておくこと。実行すると `~/.config/gcloud/application_default_credentials.json` に Application Default Credentials (ADC) が生成される。`docker-compose.yaml` はこの ADC ファイル 1 つだけをコンテナの `/tmp/application_default_credentials.json` へ read-only でマウントし（`~/.config/gcloud` ディレクトリ全体はマウントしない。他の認証情報の露出を避けるため）、`GOOGLE_APPLICATION_CREDENTIALS` 環境変数でそのパスを指す。コンテナ内の `terraform` はこの ADC をそのまま利用できる。
 - `make login`（旧 `terraform login`）は不要になったため廃止した。
 
 ## Working in the Docker container
