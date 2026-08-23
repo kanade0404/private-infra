@@ -8,14 +8,20 @@ on:
       - 'grafana/**'
       - '.github/workflows/grafana_apply_terraform.yaml'
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 permissions:
   contents: read
-  pull-requests: write
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    # GitHub Actions permissions can only be scoped at the workflow or job level
+    # (not per step), so pull-requests: write is kept here at the job level.
+    # tfcmt's apply step looks up the merged PR from the push event to post its
+    # result comment, so this scope is preserved rather than dropped to
+    # contents: write; GITHUB_TOKEN itself is further scoped to just that step
+    # via its own env block below.
+    permissions:
+      contents: read
+      pull-requests: write
 
     defaults:
       run:
@@ -25,6 +31,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: 'Apply Start Slack Notification'
         uses: kanade0404/slatify@49d087e4b74ccac7a1f12db94932cb87f7e759a9 # v1.0.0
@@ -67,6 +75,8 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: tfcmt apply -- terraform apply -no-color -auto-approve
 
       - name: Slack Notification
