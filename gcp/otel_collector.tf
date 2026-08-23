@@ -178,6 +178,15 @@ resource "google_cloud_run_v2_service" "otel_collector" {
   template {
     service_account = google_service_account.otel_collector.email
 
+    # max_instance_count = 1 はインスタンス数を縛るだけで、同一インスタンス内の
+    # リクエスト並行処理は制限しない (未設定時のデフォルト同時実行数は vCPU 数 ×
+    # 80 = 80)。delta_to_cumulative は状態更新をロックで保護するが、送信キューへの
+    # エンキュー順序までは保証しないため、並行リクエストがあると cumulative サンプル
+    # が逆順で送信され Mimir に out-of-order として拒否され得る。リクエスト処理を
+    # 直列化して送信順序を保つ (実測レイテンシは 2ms 程度でスループットに余裕が
+    # あるため直列化による実害はない)。
+    max_instance_request_concurrency = 1
+
     scaling {
       min_instance_count = 0
       max_instance_count = 1
