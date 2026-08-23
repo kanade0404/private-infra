@@ -128,6 +128,11 @@ locals {
           enabled: true
         sending_queue:
           enabled: true
+          # default の 10 consumer が並行送信すると同一時系列のサンプルが順序逆転
+          # して届き得る。cumulative (delta_to_cumulative 変換後) は順序に意味があり、
+          # Mimir は out-of-order window を超えた古いサンプルを拒否するため 1 に絞る。
+          # 個人利用のスループットなら 1 consumer で十分。
+          num_consumers: 1
 
     processors:
       # Grafana Cloud (Mimir) は cumulative temporality しか受け付けず、Claude Code の
