@@ -48,22 +48,22 @@ jobs:
           workload_identity_provider: 'projects/137094135185/locations/global/workloadIdentityPools/gh-oidc-pool/providers/github-actions'
           service_account: 'github-actions@kanade0404.iam.gserviceaccount.com'
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
         with:
-          terraform_version: 1.11.4
+          tofu_version: 1.11.5
 
-      - name: Terraform Format
+      - name: OpenTofu Format
         id: fmt
-        run: terraform fmt -recursive -check
+        run: tofu fmt -recursive -check
 
-      - name: Terraform Init
+      - name: OpenTofu Init
         id: init
-        run: terraform init
+        run: tofu init
 
-      - name: Terraform Validate
+      - name: OpenTofu Validate
         id: validate
-        run: terraform validate -no-color
+        run: tofu validate -no-color
 
       - name: setup tfcmt
         env:
@@ -76,12 +76,12 @@ jobs:
           mv /tmp/tfcmt /usr/local/bin
           tfcmt --version
 
-      - name: Terraform Plan
+      - name: OpenTofu Plan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
           GRAFANA_AUTH: ${{ secrets.GRAFANA_AUTH }}
-        run: tfcmt plan -patch -- terraform plan -no-color -input=false
+        run: tfcmt plan -patch -- tofu plan -no-color -input=false
 
       - name: Slack Notification
         uses: kanade0404/slatify@49d087e4b74ccac7a1f12db94932cb87f7e759a9 # v1.0.0

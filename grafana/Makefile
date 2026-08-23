@@ -1,19 +1,11 @@
-up:
-	docker compose up -d
-stop:
-	docker compose stop
-ps:
-	docker compose ps
-down:
-	docker compose down
-bash:
-	docker compose exec grafana_infra sh
+.PHONY: init format plan apply
+
 init:
-	docker compose exec grafana_infra terraform init
+	tofu init
 format: init
-	docker compose exec grafana_infra terraform fmt -recursive
-	docker compose exec grafana_infra terraform validate
+	tofu fmt -recursive
+	tofu validate
 plan:
-	docker compose exec grafana_infra terraform plan
+	tofu plan
 apply:
-	docker compose exec grafana_infra terraform apply
+	tofu apply
