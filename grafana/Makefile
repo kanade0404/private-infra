@@ -5,7 +5,7 @@ init:
 format: init
 	tofu fmt -recursive
 	tofu validate
-plan:
+plan: init
 	tofu plan
-apply:
+apply: init
 	tofu apply
