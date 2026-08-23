@@ -9,10 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Overview
 
 個人プロジェクト `kanade0404` のクラウドインフラを 1 リポジトリで一元管理するモノレポ。
-2 つの独立したスタックを持つ:
+3 つの独立したスタックを持つ:
 
 - **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **Terraform Cloud**（org `kaNade` / workspace `private-infra`）。Docker でツールを実行。詳細は `gcp/CLAUDE.md`。
 - **`aws/`** — AWS インフラ。**OpenTofu** 1.15.5 + **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
+- **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**Terraform** 1.11.4 + **Terraform Cloud**（org `kaNade` / workspace `private-infra-grafana`）。Docker でツールを実行。詳細は `grafana/CLAUDE.md`。
 
 各スタックは backend が独立しており **state は完全に分離**している。スタックを横断する共有 state は存在しない。新しいリソースは対象クラウドのスタック配下に追加すること。
 
@@ -22,10 +23,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **GCP**: `cd gcp` してから `make ...`（Docker 経由。例: `make plan` / `make apply`）
 - **AWS**: `cd aws` で `nix develop`（または direnv 自動有効化）→ `cd environments/<env>` で `tofu ...`
+- **Grafana**: `cd grafana` してから `make ...`（Docker 経由。例: `make plan` / `make apply`）
 
 ## CI/CD
 
-- **GCP のみ** GitHub Actions あり（`.github/workflows/`）。`gcp/**` の変更時のみ発火し、`gcp/` を作業ディレクトリとして `terraform plan` / `apply` を実行する。
+- **GCP と Grafana** は GitHub Actions あり（`.github/workflows/`）。それぞれ `gcp/**` / `grafana/**` の変更時のみ発火し、対応するディレクトリを作業ディレクトリとして `terraform plan` / `apply` を実行する。両者は別ワークフローで、TFC API トークンの secret のみ共有する。
 - **AWS は CI なし**。`plan` / `apply` は SSO ログイン済みのローカルから `tofu` で実行する。
 
 ## このリポジトリの成り立ち
