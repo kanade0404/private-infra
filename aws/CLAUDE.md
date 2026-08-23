@@ -60,6 +60,21 @@ cd environments/management && tofu apply
 terraform-docs markdown table environments/management
 ```
 
+## ローカル環境のセットアップ(新マシン)
+
+AWS CLI はルート flake の devShell に含まれる（`nix develop` / direnv 経由）。追加インストール不要。
+
+SSO プロファイルは用途ごとに 5 つ構成する（いずれも IAM Identity Center の `AdministratorAccess` ロール、region `ap-northeast-1`）:
+
+- `management-admin` — state backend（S3/DynamoDB）用
+- `personal-dev-admin` / `personal-prd-admin` / `business-dev-admin` / `business-prd-admin` — 各環境 provider 用
+
+セットアップ: `aws configure sso` を各プロファイル分実行する。SSO session を共有すれば、ブラウザでの認証は初回のみで済む。SSO start URL は IAM Identity Center の access portal URL（AWS コンソールの IAM Identity Center → Settings で確認）。
+
+日常のログイン: `aws sso login --profile management-admin`（または共有 session 名で `aws sso login --sso-session <name>`）。
+
+既存マシンからの移行であれば `~/.aws/config` をコピーするだけでも良い。
+
 ## Git Hooks (Lefthook)
 
 - **pre-commit** (parallel): `tofu fmt -recursive -check`, `tflint --recursive`, `tofu validate`（全環境）
