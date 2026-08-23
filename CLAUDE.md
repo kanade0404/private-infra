@@ -12,17 +12,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3 つの独立したスタックを持つ:
 
 - **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **Terraform Cloud**（org `kaNade` / workspace `private-infra`）。Docker でツールを実行。詳細は `gcp/CLAUDE.md`。
-- **`aws/`** — AWS インフラ。**OpenTofu** 1.15.5 + **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
+- **`aws/`** — AWS インフラ。**OpenTofu** 1.11.5 + **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
 - **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**Terraform** 1.11.4 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `grafana`）。Docker でツールを実行。詳細は `grafana/CLAUDE.md`。
 
 各スタックは backend が独立しており **state は完全に分離**している。スタックを横断する共有 state は存在しない。新しいリソースは対象クラウドのスタック配下に追加すること。
+
+開発環境はリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。ルートで `direnv allow`（初回のみ）すればサブディレクトリでも devShell が有効になり、`tofu` / `awscli2` / `gcloud` / `tflint` / `trivy` / `terraform-docs` / `jq` / `lefthook` / `nodejs` が揃う。現状 flake を実際に使うのは `aws/` のみで、`gcp/` と `grafana/` は当面 Docker のまま（統一計画は issue #470）。
 
 ## 作業ディレクトリ
 
 スタックごとにツールチェーンが異なるため、必ず対象ディレクトリへ移動してから作業する。
 
 - **GCP**: `cd gcp` してから `make ...`（Docker 経由。例: `make plan` / `make apply`）
-- **AWS**: `cd aws` で `nix develop`（または direnv 自動有効化）→ `cd environments/<env>` で `tofu ...`
+- **AWS**: リポジトリルートで `nix develop`（または direnv 自動有効化。flake はルートにある）→ `cd aws/environments/<env>` で `tofu ...`
 - **Grafana**: `cd grafana` してから `make ...`（Docker 経由。例: `make plan` / `make apply`）
 
 ## CI/CD

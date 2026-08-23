@@ -25,15 +25,17 @@ environments/
 
 ## 開発環境
 
-Nix Flake + direnv で管理。`cd` するだけで開発環境が整う。
+Nix Flake + direnv で管理。**flake（`flake.nix` / `flake.lock` / `.envrc`）はリポジトリルートにある**（この `aws/` ディレクトリではない）。ルート配下ならどこに `cd` しても direnv が同じ devShell を有効化する。
 
 ```sh
-# 初回のみ
-direnv allow
+# 初回のみ（リポジトリルートで実行）
+cd <repo-root> && direnv allow
 
-# 手動で入る場合
-nix develop
+# 手動で入る場合（リポジトリルートで実行）
+cd <repo-root> && nix develop
 ```
+
+devShell に入ってしまえば、`cd aws/environments/<env>` して `tofu` をそのまま実行できる。
 
 ## コマンド
 
@@ -65,13 +67,15 @@ terraform-docs markdown table environments/management
 
 ## ツール
 
-### flake.nix で管理
+### flake.nix で管理（flake はリポジトリルート）
 
 - OpenTofu — IaC（Terraform 互換、コマンドは `tofu`）
 - TFLint — Terraform リンター
 - Trivy — セキュリティスキャナー（IaC + コンテナ + 依存関係）
 - terraform-docs — ドキュメント自動生成
 - AWS CLI v2
+- Google Cloud SDK — `gcp/` `grafana/` スタック向け（AWS 作業では未使用）
+- jq — state / JSON の検査用
 - Lefthook — Git hooks
 - Node.js — secretlint 実行用
 
