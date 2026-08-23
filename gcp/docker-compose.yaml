@@ -10,9 +10,17 @@ services:
     volumes:
       - .:/private-cloud:cached
       - /var/run/docker.sock:/var/run/docker.sock
+      # GCS backend / google provider への認証には gcloud ADC (Application Default
+      # Credentials) を使う。ホスト側で `gcloud auth application-default login`
+      # 済みの ADC ファイル 1 つだけを read-only でマウントする。
+      # `~/.config/gcloud` ディレクトリ全体をマウントすると、不要な他の認証情報
+      # （他プロジェクトの認証情報等）までコンテナに露出してしまうため、
+      # 必要な ADC ファイルのみに絞る。
+      - ${HOME}/.config/gcloud/application_default_credentials.json:/tmp/application_default_credentials.json:cached,ro
     entrypoint: bash
     environment:
       HOME: "/private-cloud"
-      GOOGLE_CREDENTIALS: "/private-cloud/gcp-credential.json"
+      # ADC ファイルの場所を terraform (google provider / GCS backend) に明示的に伝える。
+      GOOGLE_APPLICATION_CREDENTIALS: "/tmp/application_default_credentials.json"
 volumes:
   gcloud-config:

@@ -1,8 +1,6 @@
 variable "PROJECT_ID" {
-  type = string
-}
-variable "GOOGLE_CREDENTIALS" {
-  type = any
+  type    = string
+  default = "kanade0404"
 }
 variable "grafana_otlp_endpoint" {
   type        = string
