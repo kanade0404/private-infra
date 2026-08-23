@@ -1,0 +1,86 @@
+name: 'Terraform (Grafana)'
+
+on:
+  pull_request:
+    paths:
+      - 'grafana/**'
+      - '.github/workflows/grafana_plan_terraform.yaml'
+
+permissions:
+  contents: read
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    # GitHub Actions permissions can only be scoped at the workflow or job level
+    # (not per step), so pull-requests: write is granted here at the job level
+    # for the tfcmt PR comment step. GITHUB_TOKEN itself is further scoped to
+    # just that step via its own env block below.
+    permissions:
+      contents: read
+      pull-requests: write
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: grafana
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: 'Plan Start Slack Notification'
+        uses: kanade0404/slatify@49d087e4b74ccac7a1f12db94932cb87f7e759a9 # v1.0.0
+        with:
+          type: success
+          username: ${{ github.workflow }}
+          icon_emoji: ':github:'
+          job_name: '*Terraform (Grafana) Plan Start*'
+          url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.11.4
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -recursive -check
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: setup tfcmt
+        env:
+          TFCMT_VERSION: v4.7.1
+          TFCMT_SHA256: 9ae464a3e33bc7d9ce61fe6aaf70fbeb5320bfad5fb4045c424cd735e9afffcb
+        run: |
+          wget "https://github.com/suzuki-shunsuke/tfcmt/releases/download/${TFCMT_VERSION}/tfcmt_linux_amd64.tar.gz" -O /tmp/tfcmt.tar.gz
+          echo "${TFCMT_SHA256}  /tmp/tfcmt.tar.gz" | sha256sum -c -
+          tar xzf /tmp/tfcmt.tar.gz -C /tmp
+          mv /tmp/tfcmt /usr/local/bin
+          tfcmt --version
+
+      - name: Terraform Plan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: tfcmt plan -patch -- terraform plan -no-color -input=false
+
+      - name: Slack Notification
+        uses: kanade0404/slatify@49d087e4b74ccac7a1f12db94932cb87f7e759a9 # v1.0.0
+        if: always()
+        with:
+          type: ${{ job.status }}
+          username: ${{ github.workflow }}
+          icon_emoji: ':github:'
+          job_name: '*Terraform (Grafana) Plan Result*'
+          url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
