@@ -5,9 +5,13 @@
   ],
   "packageRules": [
     {
-      "description": "OpenTofu のバージョンはルート flake.lock を唯一の真実とし、required_version は下限指定として手動管理する。terraform manager は required_version を HashiCorp Terraform のリリース (OpenTofu には存在しない 1.15.x など) として追跡してしまうため無効化する。flake.lock (nix manager) の更新は無効化しない。",
+      "description": "OpenTofu スタック (aws/, grafana/) のバージョンはルート flake.lock を唯一の真実とし、required_version は下限指定として手動管理する。terraform manager は required_version を HashiCorp Terraform のリリース (OpenTofu には存在しない 1.15.x など) として追跡してしまうため無効化する。gcp/ は本家 Terraform を使うため対象外とし、Renovate による追跡を継続する。flake.lock (nix manager) の更新も無効化しない。",
       "matchManagers": [
         "terraform"
+      ],
+      "matchFileNames": [
+        "aws/**",
+        "grafana/**"
       ],
       "matchDepTypes": [
         "required_version"

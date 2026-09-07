@@ -73,7 +73,7 @@ SSO プロファイルは用途ごとに 5 つ構成する（いずれも IAM Id
 
 日常のログイン: `aws sso login --profile management-admin`（または共有 session 名で `aws sso login --sso-session <name>`）。
 
-既存マシンからの移行であれば `~/.aws/config` をコピーするだけでも良い。
+既存マシンからの移行であれば `aws configure sso` の代わりに `~/.aws/config` をコピーしてもよい。ただし `~/.aws/config` はプロファイル定義だけで、SSO のトークンキャッシュは `~/.aws/sso/cache` に別途保存されるため**コピーだけでは認証されない**。新マシンでは必ず `aws sso login --profile management-admin`（共有 session を使う場合は `aws sso login --sso-session <name>`）を実行してから `tofu init` / `tofu plan` を行うこと。
 
 ## Git Hooks (Lefthook)
 
