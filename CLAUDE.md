@@ -12,12 +12,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3 つの独立したスタックを持つ:
 
 - **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **Terraform Cloud**（org `kaNade` / workspace `private-infra`）。Docker でツールを実行。詳細は `gcp/CLAUDE.md`。
-- **`aws/`** — AWS インフラ。**OpenTofu** 1.11.5 + **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
-- **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**OpenTofu** 1.11.5 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `grafana`）。Nix flake でツールを実行。詳細は `grafana/CLAUDE.md`。
+- **`aws/`** — AWS インフラ。**OpenTofu**（バージョンはルート `flake.lock` で固定。現在 1.12.5）+ **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
+- **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**OpenTofu** 1.12.5 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `grafana`）。Nix flake でツールを実行。詳細は `grafana/CLAUDE.md`。
 
 各スタックは backend が独立しており **state は完全に分離**している。スタックを横断する共有 state は存在しない。新しいリソースは対象クラウドのスタック配下に追加すること。
 
 開発環境はリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。ルートで `direnv allow`（初回のみ）すればサブディレクトリでも devShell が有効になり、`tofu` / `awscli2` / `gcloud` / `tflint` / `trivy` / `terraform-docs` / `jq` / `lefthook` / `nodejs` が揃う。現状 flake を使うのは `aws/` と `grafana/` で、`gcp/` は当面 Docker のまま（統一計画は issue #470）。
+
+**OpenTofu のバージョンは `flake.lock` が唯一の真実**。`aws/environments/*/main.tf` や `grafana/terraform.tf` の `required_version` は `>=` の下限指定に留め、実バージョンの上げ下げは `nix flake update` で行う。`required_version` は Renovate の更新対象から除外している（ルート `renovate.json` の packageRule）。
 
 ## 作業ディレクトリ
 
