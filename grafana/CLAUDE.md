@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Grafana Cloud (kanade0404 個人スタック) のダッシュボード / リソースを管理する **OpenTofu** スタック（1.11.5）。state は **GCS バケット** `gs://tfstate-kanade0404-terraform`（prefix `grafana`）に置く。プロバイダは `grafana/grafana`（provider registry は `registry.opentofu.org`）。
+Grafana Cloud (kanade0404 個人スタック) のダッシュボード / リソースを管理する **OpenTofu** スタック（1.12.5）。state は **GCS バケット** `gs://tfstate-kanade0404-terraform`（prefix `grafana`）に置く。プロバイダは `grafana/grafana`（provider registry は `registry.opentofu.org`）。
 
 > これはモノレポの **Grafana スタック** です。兄弟スタックの **GCP** (`../gcp`) と **AWS** (`../aws`) はそれぞれ独立した backend を持ち、state は完全に分離しています。詳細はリポジトリルートの `CLAUDE.md` を参照。
 
@@ -30,7 +30,7 @@ Grafana Cloud (kanade0404 個人スタック) のダッシュボード / リソ�
 
 ## ツールチェーン (Nix)
 
-ツールはリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。OpenTofu 1.11.5 / gcloud SDK / jq などが devShell に入っている。Docker / docker-compose は使わない。
+ツールはリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。OpenTofu 1.12.5 / gcloud SDK / jq などが devShell に入っている。Docker / docker-compose は使わない。
 
 ```sh
 # 初回のみ（リポジトリルートで）
