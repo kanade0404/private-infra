@@ -27,11 +27,19 @@ environments/
 
 state の保存先（S3 `private-infra-aws-tfstate` / DynamoDB `terraform-lock`）を `management/state.tf` 自身が管理しているため、これらを失うと通常の `tofu init` が通らない。喪失範囲ごとに手順が異なる。
 
-**state オブジェクトだけを失った場合（まずこれを試す）**: バケットはバージョニング有効（`aws_s3_bucket_versioning.tfstate`）なので旧バージョンから復元できる。削除マーカーが付いただけなら、そのマーカーを `aws s3api delete-object --version-id <削除マーカーの id>` で消すだけでよい。実体を取り出して書き戻す場合は以下。
+**state オブジェクトだけを失った場合（まずこれを試す）**: バケットはバージョニング有効（`aws_s3_bucket_versioning.tfstate`）なので旧バージョンから復元できる。削除マーカーが付いただけならマーカーを消すだけでよく、そうでなければ旧バージョンの実体を取り出して同じ key へ書き戻す。
 
 ```sh
+# 1. バージョン一覧（DeleteMarkers / Versions を確認）
 aws s3api list-object-versions --bucket private-infra-aws-tfstate \
   --prefix "<環境名>/terraform.tfstate" --profile management-admin
+
+# 2a. 削除マーカーだけの場合: マーカーを削除して元に戻す
+aws s3api delete-object --bucket private-infra-aws-tfstate \
+  --key "<環境名>/terraform.tfstate" --version-id <削除マーカーの id> \
+  --profile management-admin
+
+# 2b. 旧バージョンから復元する場合
 aws s3api get-object --bucket private-infra-aws-tfstate \
   --key "<環境名>/terraform.tfstate" --version-id <id> \
   --profile management-admin /tmp/terraform.tfstate
