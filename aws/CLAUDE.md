@@ -25,15 +25,17 @@ environments/
 
 ## 開発環境
 
-Nix Flake + direnv で管理。`cd` するだけで開発環境が整う。
+Nix Flake + direnv で管理。**flake（`flake.nix` / `flake.lock` / `.envrc`）はリポジトリルートにある**（この `aws/` ディレクトリではない）。ルート配下ならどこに `cd` しても direnv が同じ devShell を有効化する。
 
 ```sh
-# 初回のみ
-direnv allow
+# 初回のみ（リポジトリルートで実行）
+cd <repo-root> && direnv allow
 
-# 手動で入る場合
-nix develop
+# 手動で入る場合（リポジトリルートで実行）
+cd <repo-root> && nix develop
 ```
+
+devShell に入ってしまえば、`cd aws/environments/<env>` して `tofu` をそのまま実行できる。
 
 ## コマンド
 
@@ -58,6 +60,21 @@ cd environments/management && tofu apply
 terraform-docs markdown table environments/management
 ```
 
+## ローカル環境のセットアップ(新マシン)
+
+AWS CLI はルート flake の devShell に含まれる（`nix develop` / direnv 経由）。追加インストール不要。
+
+SSO プロファイルは用途ごとに 5 つ構成する（いずれも IAM Identity Center の `AdministratorAccess` ロール、region `ap-northeast-1`）:
+
+- `management-admin` — state backend（S3/DynamoDB）用
+- `personal-dev-admin` / `personal-prd-admin` / `business-dev-admin` / `business-prd-admin` — 各環境 provider 用
+
+セットアップ: `aws configure sso` を各プロファイル分実行する。SSO session を共有すれば、ブラウザでの認証は初回のみで済む。SSO start URL は IAM Identity Center の access portal URL（AWS コンソールの IAM Identity Center → Settings で確認）。
+
+日常のログイン: `aws sso login --profile management-admin`（または共有 session 名で `aws sso login --sso-session <name>`）。
+
+既存マシンからの移行であれば `aws configure sso` の代わりに `~/.aws/config` をコピーしてもよい。ただし `~/.aws/config` はプロファイル定義だけで、SSO のトークンキャッシュは `~/.aws/sso/cache` に別途保存されるため**コピーだけでは認証されない**。新マシンでは必ず `aws sso login --profile management-admin`（共有 session を使う場合は `aws sso login --sso-session <name>`）を実行してから `tofu init` / `tofu plan` を行うこと。
+
 ## Git Hooks (Lefthook)
 
 - **pre-commit** (parallel): `tofu fmt -recursive -check`, `tflint --recursive`, `tofu validate`（全環境）
@@ -65,13 +82,15 @@ terraform-docs markdown table environments/management
 
 ## ツール
 
-### flake.nix で管理
+### flake.nix で管理（flake はリポジトリルート）
 
 - OpenTofu — IaC（Terraform 互換、コマンドは `tofu`）
 - TFLint — Terraform リンター
 - Trivy — セキュリティスキャナー（IaC + コンテナ + 依存関係）
 - terraform-docs — ドキュメント自動生成
 - AWS CLI v2
+- Google Cloud SDK — `gcp/` `grafana/` スタック向け（AWS 作業では未使用）
+- jq — state / JSON の検査用
 - Lefthook — Git hooks
 - Node.js — secretlint 実行用
 

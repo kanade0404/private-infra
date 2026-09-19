@@ -1,5 +1,5 @@
 {
-  description = "private-infra-aws dev environment";
+  description = "private-infra dev environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -19,6 +19,8 @@
             trivy
             terraform-docs
             awscli2
+            google-cloud-sdk
+            jq
             lefthook
             nodejs
           ];
