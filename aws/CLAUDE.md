@@ -21,7 +21,7 @@ environments/
 └── business-prd/      # 個人事業 本番環境
 ```
 
-各ディレクトリは独立した Terraform root module。State は管理アカウントの S3 バケットに保存。
+各ディレクトリは独立した Terraform root module。State は 5 環境すべて管理アカウントの S3 バケット（key: `<環境名>/terraform.tfstate`）に保存。バケットと DynamoDB ロックテーブル自体は `management/state.tf` で管理しており、management 自身の state も同じバケットに入る自己参照的なブートストラップ構成。
 
 ## 開発環境
 
