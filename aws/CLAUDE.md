@@ -27,15 +27,27 @@ environments/
 
 state の保存先（S3 `private-infra-aws-tfstate` / DynamoDB `terraform-lock`）を `management/state.tf` 自身が管理しているため、これらを失うと通常の `tofu init` が通らない。喪失範囲ごとに手順が異なる。
 
-**state オブジェクトだけを失った場合（まずこれを試す）**: バケットはバージョニング有効（`aws_s3_bucket_versioning.tfstate`）なので旧バージョンから復元できる。`aws s3api list-object-versions --bucket private-infra-aws-tfstate --prefix <環境名>/terraform.tfstate --profile management-admin` でバージョンを確認し、`aws s3api get-object --version-id <id>` で取り出して同じ key に `put-object` で書き戻す（削除マーカーが付いただけならそれを削除するだけでよい）。
+**state オブジェクトだけを失った場合（まずこれを試す）**: バケットはバージョニング有効（`aws_s3_bucket_versioning.tfstate`）なので旧バージョンから復元できる。削除マーカーが付いただけなら、そのマーカーを `aws s3api delete-object --version-id <削除マーカーの id>` で消すだけでよい。実体を取り出して書き戻す場合は以下。
+
+```sh
+aws s3api list-object-versions --bucket private-infra-aws-tfstate \
+  --prefix "<環境名>/terraform.tfstate" --profile management-admin
+aws s3api get-object --bucket private-infra-aws-tfstate \
+  --key "<環境名>/terraform.tfstate" --version-id <id> \
+  --profile management-admin /tmp/terraform.tfstate
+aws s3api put-object --bucket private-infra-aws-tfstate \
+  --key "<環境名>/terraform.tfstate" --body /tmp/terraform.tfstate \
+  --profile management-admin
+```
 
 **バケット自体を失った場合**:
 
-1. `management/backend.tf` を一時的にコメントアウトし、`tofu init -reconfigure` で local backend にする（既存 state の移行は走らせない）
-2. `tofu apply -target=aws_s3_bucket.tfstate -target=aws_s3_bucket_versioning.tfstate -target=aws_s3_bucket_server_side_encryption_configuration.tfstate -target=aws_s3_bucket_public_access_block.tfstate -target=aws_dynamodb_table.terraform_lock` でバケットとロックテーブルを再作成（state は空から始まる）
-3. 残っている既存リソース（Organizations / SSO 等）は `tofu import` で local state に取り込む。ローカルバックアップがあれば import の代わりにそれを使う
-4. `backend.tf` のコメントアウトを戻し、`tofu init -migrate-state` で local → S3 へ移行。移行後にローカルの `terraform.tfstate` / `terraform.tfstate.backup` を削除する
-5. 他 4 環境の state も同じバケットにあるため、各環境でバックアップから `tofu state push`（無ければ同様に import）して復旧する
+1. 作業ディレクトリに古い `terraform.tfstate` / `terraform.tfstate.backup` が残っていれば別名へ退避する（空の local state から始めるため）
+2. `management/backend.tf` を一時的にコメントアウトし、`tofu init -reconfigure` で local backend にする（既存 state の移行は走らせない）
+3. `tofu apply -target=aws_s3_bucket.tfstate -target=aws_s3_bucket_versioning.tfstate -target=aws_s3_bucket_server_side_encryption_configuration.tfstate -target=aws_s3_bucket_public_access_block.tfstate -target=aws_dynamodb_table.terraform_lock` でバケットとロックテーブルを再作成
+4. 残っている既存リソース（Organizations / SSO 等）は `tofu import` で local state に取り込む。ローカルバックアップがあれば import の代わりにそれを使う
+5. `backend.tf` のコメントアウトを戻し、`tofu init -migrate-state` で local → S3 へ移行。移行後に `tofu state pull` で別途バックアップを取り、`tofu plan -detailed-exitcode` が 0（差分なし）になることを確認してからローカルの `terraform.tfstate` / `terraform.tfstate.backup` を削除する
+6. 他 4 環境の state も同じバケットにあるため、各環境でバックアップから `tofu state push`（無ければ同様に import）して復旧する
 
 **ロックテーブルだけを失った場合**: state 本体は S3 にあるので作り直すだけでよい。`backend.tf` はそのままに `tofu apply -lock=false -target=aws_dynamodb_table.terraform_lock` を実行する（テーブルが無くても `tofu init` は通り、`-lock=false` を付ければ一時的に運用も継続できる）。
 
