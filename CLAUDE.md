@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 個人プロジェクト `kanade0404` のクラウドインフラを 1 リポジトリで一元管理するモノレポ。
 3 つの独立したスタックを持つ:
 
-- **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **Terraform Cloud**（org `kaNade` / workspace `private-infra`）。Docker でツールを実行。詳細は `gcp/CLAUDE.md`。
+- **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `gcp`）。Docker でツールを実行。詳細は `gcp/CLAUDE.md`。
 - **`aws/`** — AWS インフラ。**OpenTofu**（バージョンはルート `flake.lock` で固定。現在 1.12.5）+ **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
 - **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**OpenTofu** 1.12.5 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `grafana`）。Nix flake でツールを実行。詳細は `grafana/CLAUDE.md`。
 
@@ -31,7 +31,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## CI/CD
 
-- **GCP と Grafana** は GitHub Actions あり（`.github/workflows/`）。それぞれ `gcp/**` / `grafana/**` の変更時のみ発火し、対応するディレクトリを作業ディレクトリとして plan / apply を実行する（GCP は `terraform`、Grafana は `tofu`）。両者は別ワークフローで、Grafana は GCS backend への認証に GCP と同じ Workload Identity Federation を使う（GCP は state も TFC のまま、Grafana は state を GCS に移行済み）。
+- **GCP と Grafana** は GitHub Actions あり（`.github/workflows/`）。それぞれ `gcp/**` / `grafana/**` の変更時のみ発火し、対応するディレクトリを作業ディレクトリとして plan / apply を実行する（GCP は `terraform`、Grafana は `tofu`）。両者は別ワークフローだが、どちらも state は同じ GCS バケット（`gs://tfstate-kanade0404-terraform`。prefix は `gcp` / `grafana` で分離）に置き、backend への認証には共通の Workload Identity Federation（`github-actions@kanade0404.iam.gserviceaccount.com`）を使う。
 - **AWS は CI なし**。`plan` / `apply` は SSO ログイン済みのローカルから `tofu` で実行する。
 
 ## このリポジトリの成り立ち

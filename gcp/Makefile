@@ -2,12 +2,9 @@ setup:
 	docker compose exec private_infra gcloud auth application-default login
 	docker compose exec private_infra gcloud auth login
 	make project-set
-	make login
 	make init
 init:
 	docker compose exec private_infra terraform init
-login:
-	docker compose exec private_infra terraform login
 upgrade:
 	docker compose exec private_infra terraform init -upgrade
 format:
