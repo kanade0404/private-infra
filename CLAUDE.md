@@ -19,6 +19,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 開発環境はリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。ルートで `direnv allow`（初回のみ）すればサブディレクトリでも devShell が有効になり、`tofu` / `awscli2` / `gcloud` / `tflint` / `trivy` / `terraform-docs` / `jq` / `lefthook` / `nodejs` が揃う。現状 flake を使うのは `aws/` と `grafana/` で、`gcp/` は当面 Docker のまま（統一計画は issue #470）。
 
+git hooks は **lefthook**。lefthook 2.x はリポジトリルートの設定しか読まないため、設定はルートの `lefthook.yml` 1 ファイルに集約し、スタックごとの作業ディレクトリは `root:` で切り替えている。インストールは Claude Code の SessionStart hook（`.claude/hooks/setup-env.sh`）が自動で行う（手動なら `nix develop --command lefthook install`）。
+
 **OpenTofu のバージョンは `flake.lock` が唯一の真実**。`aws/environments/*/main.tf` や `grafana/terraform.tf` の `required_version` は `>=` の下限指定に留め、実バージョンの上げ下げは `nix flake update` で行う。`required_version` は Renovate の更新対象から除外している（ルート `renovate.json` の packageRule）。
 
 ## 作業ディレクトリ

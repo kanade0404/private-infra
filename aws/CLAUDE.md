@@ -115,8 +115,14 @@ SSO プロファイルは用途ごとに 5 つ構成する（いずれも IAM Id
 
 ## Git Hooks (Lefthook)
 
-- **pre-commit** (parallel): `tofu fmt -recursive -check`, `tflint --recursive`, `tofu validate`（全環境）
-- **pre-push** (parallel): `secretlint`, `trivy config`
+設定は**リポジトリルートの `lefthook.yml` 1 ファイルに集約**している（lefthook 2.x は git リポジトリルートの設定しか読まないため。かつての `aws/lefthook.yml` は読み込まれておらず機能していなかった）。AWS 向けの job は `root: aws/` で CWD を `aws/` に切り替え、`glob:` で `aws/` 配下の変更が無いときは自動的に skip される。
+
+- **pre-commit**（`aws/**/*.tf` がステージされたときのみ）: `tofu fmt -check {staged_files}`、`tflint --recursive`、`tofu validate`（全環境）
+  - `tofu fmt` は `-recursive` ではなくステージ済みの `*.tf` を渡す。`-recursive` だと gitignore 済みの `*.tfvars` まで走査して落ちるため。
+  - `tofu validate` は init 済みの環境だけを検査し、未 init の環境は `skip <env>: not initialized` と出して飛ばす。検査対象にしたければその環境で `tofu init` すること。
+- **pre-push**: `trivy config .`（`secretlint` はスタック横断でリポジトリ全体に 1 回かかる）
+
+インストールは Claude Code の SessionStart hook（`.claude/hooks/setup-env.sh`）が自動で行う。手動なら `nix develop --command lefthook install`（解除は `lefthook uninstall`）。
 
 ## ツール
 
