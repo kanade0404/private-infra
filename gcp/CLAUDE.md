@@ -70,6 +70,6 @@ Provider/version bumps are driven by **Renovate** (config extends `kanade0404/re
 
 ## Gotchas
 
-- **`lefthook.yml` is stale.** Its hooks call `docker compose exec tfgcloud …`, but the only service is `private_infra` (see `docker-compose.yaml`). The pre-commit/pre-push hooks will fail until the service name is corrected. The Makefile (`make format`, `make check`) is the working equivalent.
+- **Lefthook の設定はリポジトリルートの `lefthook.yml` に集約済み。** かつてここにあった `gcp/lefthook.yml` は、(a) lefthook 2.x がリポジトリルートの設定しか読まないためそもそも読み込まれておらず、(b) 存在しないサービス名 `tfgcloud` を指していた（実在するのは `private_infra`）という二重の理由で機能していなかった。現在はルートの設定で service 名を `private_infra` に修正したうえで、`docker ps` で **コンテナが起動しているときだけ** fmt/tflint/validate/tfsec を実行し、未起動なら skip する。したがってコンテナを上げていないときは従来どおり Makefile（`make format`, `make check`）と GitHub Actions が正。旧設定にあった `actionlint` は引き継いでいない（`actions.yaml` ワークフローが担当）。
 - Secrets/state are gitignored and secret-scanned: `credential.json`, `**/*.tfvars`, `.terraform/`. `.secretlintignore` whitelists `credential.json` and `*.tfvars` — don't commit real secrets relying on that.
 - No module structure: resources are grouped by file at the root (`iam.tf`, `kms.tf`, `gcs.tf`, `gae.tf`, `service.tf`, `workload_identity.tf`, …). New resources go in the file matching their domain.
