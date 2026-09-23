@@ -1,0 +1,121 @@
+# git hooks (lefthook) の設定。**リポジトリルートに 1 ファイルだけ置くこと。**
+#
+# lefthook 2.x は git リポジトリルートの設定ファイル
+# （`lefthook.yml` / `.lefthook.yml` / `.config/lefthook.yml`）しか読まない。
+# 以前は `aws/lefthook.yml` と `gcp/lefthook.yml` に分かれていたが、
+# `private-infra-aws` を subtree マージして `aws/` がサブディレクトリへ
+# 移った時点でどちらも読み込まれなくなり、git hooks は実質機能していなかった。
+# そのためスタックごとの設定をこのファイルへ集約し、作業ディレクトリは
+# `root:` で切り替える形にしている。
+#
+# ファイルフィルタの挙動（公式ドキュメント + lefthook 2.1.10 で実測）:
+#   - `root:` は実行時の CWD を変えると同時に、pre-commit / pre-push の対象
+#     ファイルをそのディレクトリ配下へ絞る。全て落ちれば job は skip される。
+#   - `glob:` は **常に git リポジトリルートからの相対パス** で評価される
+#     （`root:` は glob の判定に影響しない）。
+#   - lefthook の `**` は「1 階層以上」にマッチし 0 階層にはマッチしない。
+#     つまり `aws/**/*.tf` は `aws/foo.tf` に当たらない。そのため以下では
+#     `<dir>/*` と `<dir>/**/*` の 2 本を並べて配下全体を拾っている。
+#   - `run:` にファイルテンプレート（`{staged_files}` 等）が無くても、
+#     `glob:` があれば pre-commit は `{staged_files}`、pre-push は
+#     `{push_files}` に対して絞り込みが行われ、残らなければ skip される。
+#
+# インストール: `nix develop --command lefthook install`
+# （Claude Code の SessionStart hook `.claude/hooks/setup-env.sh` が自動実行する。
+#   フックは git の common dir に入るので worktree 間で共有される）
+
+pre-commit:
+  parallel: true
+  jobs:
+    # --- aws/ : OpenTofu。ツールはルート flake の devShell から来るので常に実行できる ---
+    # `*.tf` が変わったときだけ走らせる（ドキュメントだけの変更で
+    # tofu validate まで走らせる意味は無い）。
+    - name: aws
+      root: aws/
+      glob:
+        - "aws/*.tf"
+        - "aws/**/*.tf"
+      group:
+        parallel: true
+        jobs:
+          - name: format
+            # `-recursive` だと gitignore 済みの `*.tfvars` まで走査して落ちるため、
+            # ステージされた `*.tf` だけを渡す（`{staged_files}` は `root:` からの
+            # 相対パスに書き換えられる）。
+            run: tofu fmt -check {staged_files}
+          - name: lint
+            run: tflint --recursive
+          - name: validate
+            # `tofu validate` は init 済みでないと動かない。未 init / プロバイダ
+            # 未キャッシュの環境は落とさず飛ばす（無関係な理由でコミットを
+            # ブロックしないため）。検査対象にしたければ `tofu init` すること。
+            run: |
+              for dir in environments/*/; do
+                out=$(cd "$dir" && tofu validate -no-color 2>&1) && continue
+                case "$out" in
+                  *"Please run"*|*"no package for"*|*"not cached"*)
+                    echo "skip ${dir}: not initialized (run 'tofu init')" ;;
+                  *)
+                    echo "${dir}"; echo "${out}"; exit 1 ;;
+                esac
+              done
+
+    # --- gcp/ : Terraform。ツールは docker compose の `private_infra` サービス内にしか無い ---
+    # 旧 `gcp/lefthook.yml` は存在しないサービス名 `tfgcloud` を指しており、
+    # 仮に読み込まれていても必ず失敗する状態だった（実在するのは `private_infra`）。
+    # コンテナ未起動で `docker compose exec` を叩くと無関係な理由でコミットが
+    # ブロックされるため、起動中のときだけ実行する（`skip: run:` は終了コード 0 で skip）。
+    # 未起動時は従来どおり `cd gcp && make format` / `make check` と
+    # GitHub Actions 側の fmt / validate / tflint / tfsec が正となる。
+    - name: gcp
+      root: gcp/
+      glob:
+        - "gcp/*.tf"
+        - "gcp/**/*.tf"
+      skip:
+        - run: test -z "$(docker ps --filter name=^private_infra$ --filter status=running --quiet)"
+      group:
+        parallel: true
+        jobs:
+          - name: format
+            # aws 側と同じ理由で `-recursive` は使わない（gitignore 済みの
+            # `*.tfvars` や `.terraform/` まで走査して無関係に落ちる）。
+            # `{staged_files}` は `root:`（= `gcp/`）からの相対パスに
+            # 書き換えられ、コンテナの working_dir `/private-cloud` は
+            # `gcp/` のマウント先なので、そのまま解決できる。
+            run: docker compose exec -T private_infra terraform fmt -check {staged_files}
+          - name: lint
+            run: docker compose exec -T private_infra tflint
+          - name: validate
+            run: docker compose exec -T private_infra terraform validate
+
+pre-push:
+  parallel: true
+  jobs:
+    # secretlint はスタック横断でリポジトリ全体に 1 回だけかける。
+    # 旧 `gcp/lefthook.yml` の Docker 版 secretlint は冗長なのでこれへ統合した。
+    # 設定はルートの `.secretlintrc.json` / `.secretlintignore`。
+    # `.secretlintrc.json` が要求するルールプリセットは secretlint 本体には
+    # 同梱されないため、`-p` で明示的に一緒に取得する（`npx secretlint` だけだと
+    # "rule module is not found" で落ちる）。
+    - name: secretlint
+      run: npx --yes -p secretlint -p @secretlint/secretlint-rule-preset-recommend secretlint "**/*"
+
+    - name: aws-trivy
+      root: aws/
+      glob:
+        - "aws/*"
+        - "aws/**/*"
+      run: trivy config .
+
+    # 旧 `gcp/lefthook.yml` にあった actionlint は、コンテナ内の
+    # gitignore 済みバイナリ `./actionlint` に依存していたため引き継がない。
+    # `.github/workflows` の lint は GitHub Actions の `actions.yaml` が担う。
+    - name: gcp-tfsec
+      root: gcp/
+      glob:
+        - "gcp/*"
+        - "gcp/**/*"
+      skip:
+        - run: test -z "$(docker ps --filter name=^private_infra$ --filter status=running --quiet)"
+      run: docker compose exec -T private_infra tfsec .
