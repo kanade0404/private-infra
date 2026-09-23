@@ -78,7 +78,12 @@ pre-commit:
         parallel: true
         jobs:
           - name: format
-            run: docker compose exec -T private_infra terraform fmt -recursive -check
+            # aws 側と同じ理由で `-recursive` は使わない（gitignore 済みの
+            # `*.tfvars` や `.terraform/` まで走査して無関係に落ちる）。
+            # `{staged_files}` は `root:`（= `gcp/`）からの相対パスに
+            # 書き換えられ、コンテナの working_dir `/private-cloud` は
+            # `gcp/` のマウント先なので、そのまま解決できる。
+            run: docker compose exec -T private_infra terraform fmt -check {staged_files}
           - name: lint
             run: docker compose exec -T private_infra tflint
           - name: validate

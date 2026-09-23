@@ -17,15 +17,20 @@ cd "$repo" || exit 0
 install_lefthook() {
   [ -f "$repo/lefthook.yml" ] || return 0
 
-  local common_dir
-  common_dir="$(git rev-parse --git-common-dir 2>/dev/null)" || return 0
-  [ -n "$common_dir" ] || return 0
-  case "$common_dir" in
-    /*) ;;
-    *) common_dir="$repo/$common_dir" ;;
-  esac
+  # `--git-path hooks` は worktree でも common dir 側（共有の hooks/）を返し、
+  # 相対 / 絶対の正規化も git に任せられる。
+  local hooks_dir
+  hooks_dir="$(git rev-parse --git-path hooks 2>/dev/null)" || return 0
+  [ -n "$hooks_dir" ] || return 0
 
-  grep -qs lefthook "$common_dir/hooks/pre-commit" && return 0
+  # pre-commit だけ見ていると pre-push が欠けていても skip してしまうため、
+  # 両方が揃っている場合だけ install 済みとみなす。
+  if [ -x "$hooks_dir/pre-commit" ] &&
+    [ -x "$hooks_dir/pre-push" ] &&
+    grep -qs lefthook "$hooks_dir/pre-commit" &&
+    grep -qs lefthook "$hooks_dir/pre-push"; then
+    return 0
+  fi
 
   nix develop "$repo" --command lefthook install >/dev/null 2>&1 || return 0
   printf '%s\n' '{"systemMessage":"lefthook の git hooks をインストールしました"}'
