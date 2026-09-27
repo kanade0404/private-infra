@@ -1,7 +1,16 @@
 resource "aws_organizations_organization" "org" {
-  aws_service_access_principals = ["sso.amazonaws.com", "iam.amazonaws.com"]
-  feature_set                   = "ALL"
-  enabled_policy_types          = ["SERVICE_CONTROL_POLICY"]
+  # このリストは権威的に扱われ、外したプリンシパルは disable される。追記のみ行うこと。
+  # - sso.amazonaws.com     : IAM Identity Center
+  # - iam.amazonaws.com     : 一元的なルートアクセス管理（aws_iam_organizations_features）
+  # - account.amazonaws.com : メンバーアカウントのルートメールを管理アカウントから変更する
+  #                           （aws account start/accept-primary-email-update）
+  aws_service_access_principals = [
+    "sso.amazonaws.com",
+    "iam.amazonaws.com",
+    "account.amazonaws.com",
+  ]
+  feature_set          = "ALL"
+  enabled_policy_types = ["SERVICE_CONTROL_POLICY"]
 }
 
 resource "aws_organizations_organizational_unit" "personal" {
