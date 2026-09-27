@@ -61,6 +61,12 @@ aws s3api put-object --bucket private-infra-aws-tfstate \
 
 **安全策**: 大きな変更の前に `tofu state pull > ~/backup-<環境名>-$(date +%F).tfstate` でローカルバックアップを取る習慣をつけること。
 
+### メンバーアカウントのルートメール変更
+
+メンバーアカウントのルートメールは、管理アカウントから `aws account start-primary-email-update` / `accept-primary-email-update` で変更できる（Organizations の trusted access に `account.amazonaws.com` が必要。`management/organizations.tf` の `aws_service_access_principals` に追記済み）。
+
+`aws_organizations_account.email` は ForceNew のため、**AWS 側を先に変更してから `terraform.tfvars` の `account_email_prefix` を追従させること**。逆順で `tfvars` を先に変えると plan がアカウントの再作成を提案する。
+
 ## 開発環境
 
 Nix Flake + direnv で管理。**flake（`flake.nix` / `flake.lock` / `.envrc`）はリポジトリルートにある**（この `aws/` ディレクトリではない）。ルート配下ならどこに `cd` しても direnv が同じ devShell を有効化する。

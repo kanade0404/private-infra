@@ -4,6 +4,13 @@ sso_user_given_name   = "Taro"
 sso_user_family_name  = "Yamada"
 sso_user_email        = "your-email@gmail.com"
 
-# メンバーアカウント用メール（prefix+aws-personal-dev@domain の形式で使われる）
-account_email_prefix = "your-email"
+# メンバーアカウント用メール（prefix+aws-<env>@domain の形式で使われる）
+# - 実際に受信できるアドレスのユーザー名（@ より前）を指定すること。
+#   ここ宛にアカウント作成通知・請求・セキュリティ通知・パスワードリセットが届く。
+#   受信できないアドレスにすると、後からルートにアクセスできなくなる。
+# - Gmail のユーザー名にハイフン（-）は使えない（使えるのは英数字とピリオドのみ）。
+# - 変更する場合は aws account start-primary-email-update /
+#   accept-primary-email-update で AWS 側を先に変更してから、この値を合わせること
+#   （email は ForceNew のため、この値を先に変えるとアカウントが作り直される）。
+account_email_prefix = "your-gmail-username"
 account_email_domain = "gmail.com"
