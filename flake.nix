@@ -16,11 +16,11 @@
         };
         # GCP's required_version is exact. Keep the official CLI pinned separately
         # from nixpkgs so a flake update cannot silently change it.
-        terraformVersion = "1.11.4";
+        terraformVersion = "1.16.5";
         terraformReleases = {
-          x86_64-linux = { platform = "linux_amd64"; sha256 = "1ce994251c00281d6845f0f268637ba50c0005657eb3cf096b92f753b42ef4dc"; };
-          aarch64-linux = { platform = "linux_arm64"; sha256 = "a43d1d0da9b9bab214a8305a39db0e40869572594ccf50c416a7756499143633"; };
-          aarch64-darwin = { platform = "darwin_arm64"; sha256 = "867e0808fa971217043e25b7a792b10720c79b1546f8a68479b74f138be73e18"; };
+          x86_64-linux = { platform = "linux_amd64"; sha256 = "2bc2fcfff033265c9e02ca0351f01794eb122f62a9b2a49a3294b9e49eaab5e4"; };
+          aarch64-linux = { platform = "linux_arm64"; sha256 = "61a50b00485ee4810cf20581ef080fc54d34d666e175c58d9a10501c65c1ccde"; };
+          aarch64-darwin = { platform = "darwin_arm64"; sha256 = "ecdef65e24193d627f27c39baeda31295f08c938d8a3d4764f442fb916d4b7dc"; };
         };
         release = terraformReleases.${system};
         terraform = pkgs.stdenvNoCC.mkDerivation {

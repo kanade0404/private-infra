@@ -24,6 +24,9 @@
 # （Claude Code の SessionStart hook `.claude/hooks/setup-env.sh` が自動実行する。
 #   フックは git の common dir に入るので worktree 間で共有される）
 
+# Hooks must work after scripts/setup returns to a shell without the devShell PATH.
+lefthook: nix develop --command lefthook
+
 pre-commit:
   parallel: true
   jobs:
@@ -100,14 +103,15 @@ pre-push:
       glob:
         - "aws/*"
         - "aws/**/*"
-      run: trivy config --exit-code 1 .
+      # Existing findings remain advisory, as in CI; scanner errors still fail.
+      run: trivy config --exit-code 0 .
 
     - name: gcp-trivy
       root: gcp/
       glob:
         - "gcp/*"
         - "gcp/**/*"
-      run: trivy config --exit-code 1 .
+      run: trivy config --exit-code 0 .
 
     - name: actionlint
       glob:

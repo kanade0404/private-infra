@@ -11,13 +11,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 個人プロジェクト `kanade0404` のクラウドインフラを 1 リポジトリで一元管理するモノレポ。
 3 つの独立したスタックを持つ:
 
-- **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `gcp`）。Nix devShell でツールを直接実行。詳細は `gcp/CLAUDE.md`。
+- **`gcp/`** — GCP インフラ。**Terraform** 1.16.5 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `gcp`）。Nix devShell でツールを直接実行。詳細は `gcp/CLAUDE.md`。
 - **`aws/`** — AWS インフラ。**OpenTofu**（バージョンはルート `flake.lock` で固定。現在 1.12.5）+ **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
 - **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**OpenTofu** 1.12.5 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `grafana`）。Nix flake でツールを実行。詳細は `grafana/CLAUDE.md`。
 
 各スタックは backend が独立しており **state は完全に分離**している。スタックを横断する共有 state は存在しない。新しいリソースは対象クラウドのスタック配下に追加すること。
 
-開発環境はリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。`direnv allow` または `nix develop` で全スタックの CLI を揃える。Terraform は GCP の制約に合わせて `flake.nix` で 1.11.4 の公式バイナリと SHA-256 を固定し、その他のツールは `flake.lock` で固定する。
+開発環境はリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。`direnv allow` または `nix develop` で全スタックの CLI を揃える。Terraform は GCP の制約に合わせて `flake.nix` で 1.16.5 の公式バイナリと SHA-256 を固定し、その他のツールは `flake.lock` で固定する。
 
 git hooks は **lefthook**。lefthook 2.x はリポジトリルートの設定しか読まないため、設定はルートの `lefthook.yml` 1 ファイルに集約し、スタックごとの作業ディレクトリは `root:` で切り替えている。インストールは Claude Code の SessionStart hook（`.claude/hooks/setup-env.sh`）が自動で行う（手動なら `nix develop --command lefthook install`）。
 

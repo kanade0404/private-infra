@@ -64,7 +64,7 @@ tofu init
 
 - PR で `grafana/**` に変更があると plan ワークフローが走り、plan して結果を PR にコメントする。
 - `master` への push で apply ワークフローが走る。
-- GCP 用ワークフローとは別ファイルだが、GCS backend への認証は GCP と同じ Workload Identity Federation（`github-actions@kanade0404.iam.gserviceaccount.com`）を使う。Grafana provider 用に `GRAFANA_URL` / `GRAFANA_AUTH` の GitHub Secrets を別途参照する。GCP 用ワークフロー自体は変更しない。
+- GCP 用ワークフローとは別ファイルだが、GCS backend への認証は GCP と同じ Workload Identity Federation（`github-actions@kanade0404.iam.gserviceaccount.com`）を使う。Grafana provider 用に `GRAFANA_URL` / `GRAFANA_AUTH` の GitHub Secrets を別途参照する。
 
 ## ダッシュボード更新フロー
 

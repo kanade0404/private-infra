@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo"
+
+# Prefetch the archives rather than building foreign-platform executables.
+# This checks every pinned hash on any supported CI runner.
+systems="$(nix eval --json .#packages --apply builtins.attrNames | jq -r '.[]')"
+while IFS= read -r system; do
+  source_info="$(nix eval --json ".#packages.$system.terraform.src" \
+    --apply 'src: { inherit (src) urls outputHash; }')"
+  url="$(jq -er '.urls[0]' <<< "$source_info")"
+  hash="$(jq -er '.outputHash' <<< "$source_info")"
+  nix store prefetch-file --hash-type sha256 --expected-hash "$hash" "$url"
+done <<< "$systems"
