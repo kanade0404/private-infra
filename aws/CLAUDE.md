@@ -94,7 +94,7 @@ cd environments/management && tofu validate
 tflint --recursive
 
 # セキュリティスキャン
-trivy config .
+trivy config --exit-code 1 .
 
 # Plan/Apply（各 environment ディレクトリで実行）
 cd environments/management && tofu plan
@@ -126,7 +126,7 @@ SSO プロファイルは用途ごとに 5 つ構成する（いずれも IAM Id
 - **pre-commit**（`aws/**/*.tf` がステージされたときのみ）: `tofu fmt -check {staged_files}`、`tflint --recursive`、`tofu validate`（全環境）
   - `tofu fmt` は `-recursive` ではなくステージ済みの `*.tf` を渡す。`-recursive` だと gitignore 済みの `*.tfvars` まで走査して落ちるため。
   - `tofu validate` は init 済みの環境だけを検査し、未 init の環境は `skip <env>: not initialized` と出して飛ばす。検査対象にしたければその環境で `tofu init` すること。
-- **pre-push**: `trivy config .`（`secretlint` はスタック横断でリポジトリ全体に 1 回かかる）
+- **pre-push**: `trivy config --exit-code 1 .`（`secretlint` はスタック横断でリポジトリ全体に 1 回かかる）
 
 インストールは Claude Code の SessionStart hook（`.claude/hooks/setup-env.sh`）が自動で行う。手動なら `nix develop --command lefthook install`（解除は `lefthook uninstall`）。
 

@@ -11,13 +11,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 個人プロジェクト `kanade0404` のクラウドインフラを 1 リポジトリで一元管理するモノレポ。
 3 つの独立したスタックを持つ:
 
-- **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `gcp`）。Docker でツールを実行。詳細は `gcp/CLAUDE.md`。
+- **`gcp/`** — GCP インフラ。**Terraform** 1.11.4 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `gcp`）。Nix devShell でツールを直接実行。詳細は `gcp/CLAUDE.md`。
 - **`aws/`** — AWS インフラ。**OpenTofu**（バージョンはルート `flake.lock` で固定。現在 1.12.5）+ **S3/DynamoDB** backend、AWS Organizations マルチアカウント（5 環境）。Nix flake でツールを実行。詳細は `aws/CLAUDE.md`。
 - **`grafana/`** — Grafana Cloud インフラ（ダッシュボード等）。**OpenTofu** 1.12.5 + **GCS backend**（`gs://tfstate-kanade0404-terraform` / prefix `grafana`）。Nix flake でツールを実行。詳細は `grafana/CLAUDE.md`。
 
 各スタックは backend が独立しており **state は完全に分離**している。スタックを横断する共有 state は存在しない。新しいリソースは対象クラウドのスタック配下に追加すること。
 
-開発環境はリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。ルートで `direnv allow`（初回のみ）すればサブディレクトリでも devShell が有効になり、`tofu` / `awscli2` / `gcloud` / `tflint` / `trivy` / `terraform-docs` / `jq` / `lefthook` / `nodejs` が揃う。現状 flake を使うのは `aws/` と `grafana/` で、`gcp/` は当面 Docker のまま（統一計画は issue #470）。
+開発環境はリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。`direnv allow` または `nix develop` で全スタックの CLI を揃える。Terraform は GCP の制約に合わせて `flake.nix` で 1.11.4 の公式バイナリと SHA-256 を固定し、その他のツールは `flake.lock` で固定する。
 
 git hooks は **lefthook**。lefthook 2.x はリポジトリルートの設定しか読まないため、設定はルートの `lefthook.yml` 1 ファイルに集約し、スタックごとの作業ディレクトリは `root:` で切り替えている。インストールは Claude Code の SessionStart hook（`.claude/hooks/setup-env.sh`）が自動で行う（手動なら `nix develop --command lefthook install`）。
 
@@ -27,9 +27,9 @@ git hooks は **lefthook**。lefthook 2.x はリポジトリルートの設定�
 
 スタックごとにツールチェーンが異なるため、必ず対象ディレクトリへ移動してから作業する。
 
-- **GCP**: `cd gcp` してから `make ...`（Docker 経由。例: `make plan` / `make apply`）
+- **GCP**: devShell に入り、OAuth / ADC 認証後に `cd gcp` で `terraform init` / `terraform plan` / `terraform apply`。
 - **AWS**: リポジトリルートで `nix develop`（または direnv 自動有効化。flake はルートにある）→ `cd aws/environments/<env>` で `tofu ...`
-- **Grafana**: リポジトリルートで `nix develop`（または direnv 自動有効化）→ `cd grafana` で `tofu ...`（`make plan` / `make apply` はそのラッパー）
+- **Grafana**: リポジトリルートで `nix develop`（または direnv 自動有効化）→ `cd grafana` で `tofu ...`
 
 ## CI/CD
 

@@ -60,40 +60,34 @@ pre-commit:
                 esac
               done
 
-    # --- gcp/ : Terraform。ツールは docker compose の `private_infra` サービス内にしか無い ---
-    # 旧 `gcp/lefthook.yml` は存在しないサービス名 `tfgcloud` を指しており、
-    # 仮に読み込まれていても必ず失敗する状態だった（実在するのは `private_infra`）。
-    # コンテナ未起動で `docker compose exec` を叩くと無関係な理由でコミットが
-    # ブロックされるため、起動中のときだけ実行する（`skip: run:` は終了コード 0 で skip）。
-    # 未起動時は従来どおり `cd gcp && make format` / `make check` と
-    # GitHub Actions 側の fmt / validate / tflint / tfsec が正となる。
+    # --- gcp/ : Terraform。ルートの Nix devShell で直接実行する ---
     - name: gcp
       root: gcp/
       glob:
         - "gcp/*.tf"
         - "gcp/**/*.tf"
-      skip:
-        - run: test -z "$(docker ps --filter name=^private_infra$ --filter status=running --quiet)"
       group:
         parallel: true
         jobs:
           - name: format
-            # aws 側と同じ理由で `-recursive` は使わない（gitignore 済みの
-            # `*.tfvars` や `.terraform/` まで走査して無関係に落ちる）。
-            # `{staged_files}` は `root:`（= `gcp/`）からの相対パスに
-            # 書き換えられ、コンテナの working_dir `/private-cloud` は
-            # `gcp/` のマウント先なので、そのまま解決できる。
-            run: docker compose exec -T private_infra terraform fmt -check {staged_files}
+            # ステージされた *.tf のみを検査する。
+            run: terraform fmt -check {staged_files}
           - name: lint
-            run: docker compose exec -T private_infra tflint
+            run: tflint
           - name: validate
-            run: docker compose exec -T private_infra terraform validate
+            run: |
+              out=$(terraform validate -no-color 2>&1) && exit 0
+              case "$out" in
+                *"Missing required provider"*|*"Please run"*|*"no package for"*|*"not cached"*)
+                  echo "skip gcp: not initialized (run 'terraform init')" ;;
+                *)
+                  echo "$out"; exit 1 ;;
+              esac
 
 pre-push:
   parallel: true
   jobs:
     # secretlint はスタック横断でリポジトリ全体に 1 回だけかける。
-    # 旧 `gcp/lefthook.yml` の Docker 版 secretlint は冗長なのでこれへ統合した。
     # 設定はルートの `.secretlintrc.json` / `.secretlintignore`。
     # `.secretlintrc.json` が要求するルールプリセットは secretlint 本体には
     # 同梱されないため、`-p` で明示的に一緒に取得する（`npx secretlint` だけだと
@@ -106,16 +100,17 @@ pre-push:
       glob:
         - "aws/*"
         - "aws/**/*"
-      run: trivy config .
+      run: trivy config --exit-code 1 .
 
-    # 旧 `gcp/lefthook.yml` にあった actionlint は、コンテナ内の
-    # gitignore 済みバイナリ `./actionlint` に依存していたため引き継がない。
-    # `.github/workflows` の lint は GitHub Actions の `actions.yaml` が担う。
-    - name: gcp-tfsec
+    - name: gcp-trivy
       root: gcp/
       glob:
         - "gcp/*"
         - "gcp/**/*"
-      skip:
-        - run: test -z "$(docker ps --filter name=^private_infra$ --filter status=running --quiet)"
-      run: docker compose exec -T private_infra tfsec .
+      run: trivy config --exit-code 1 .
+
+    - name: actionlint
+      glob:
+        - ".github/workflows/*.yaml"
+        - ".github/workflows/*.yml"
+      run: actionlint
