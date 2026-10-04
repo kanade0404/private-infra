@@ -73,8 +73,7 @@ jobs:
         uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
 
       - name: Check Trivy
-        run: nix run ..#trivy -- config --exit-code 1 .
-        continue-on-error: true
+        run: nix run ..#trivy -- config --exit-code 0 .
 
       - name: setup tfcmt
         env:
