@@ -67,6 +67,8 @@ locals {
     // Connectors API
     "connectors.googleapis.com",
     // Secret Manager API
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    // YouTube Data API v3
+    "youtube.googleapis.com"
   ]
 }
