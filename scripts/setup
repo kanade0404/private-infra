@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf '%s\n' \
+    'Usage: scripts/setup gcp | grafana | aws <environment>' \
+    'AWS environments: management, personal-dev, personal-prd, business-dev, business-prd' \
+    'Authenticate locally, install Git hooks, and initialize the selected backend.' \
+    'Grafana also requires GRAFANA_URL and GRAFANA_AUTH in your shell.'
+}
+
+if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
+  usage
+  exit 0
+fi
+
+stack="${1:-}"
+environment="${2:-}"
+case "$stack:$#" in
+  gcp:1|grafana:1) ;;
+  aws:2)
+    case "$environment" in
+      management|personal-dev|personal-prd|business-dev|business-prd) ;;
+      *) usage >&2; exit 2 ;;
+    esac
+    ;;
+  *) usage >&2; exit 2 ;;
+esac
+
+repo="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo"
+
+if [[ "${PRIVATE_INFRA_SETUP_IN_NIX:-}" != 1 ]]; then
+  if ! command -v nix >/dev/null 2>&1; then
+    printf '%s\n' 'Nix is required: https://nixos.org/download/' >&2
+    exit 1
+  fi
+  exec nix develop "$repo" --command env PRIVATE_INFRA_SETUP_IN_NIX=1 bash "$repo/scripts/setup" "$@"
+fi
+
+if [[ "$stack" == gcp || "$stack" == grafana ]]; then
+  # A child process cannot remove overrides from the caller's shell. Stop before
+  # login rather than letting the following plan silently use a different identity.
+  if [[ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}${GOOGLE_CREDENTIALS:-}" ]]; then
+    printf '%s\n' 'For local OAuth, first run: unset GOOGLE_APPLICATION_CREDENTIALS GOOGLE_CREDENTIALS' >&2
+    exit 1
+  fi
+fi
+if [[ "$stack" == grafana && ( -z "${GRAFANA_URL:-}" || -z "${GRAFANA_AUTH:-}" ) ]]; then
+  printf '%s\n' 'Export GRAFANA_URL and GRAFANA_AUTH (a Grafana service account token), then retry.' >&2
+  exit 1
+fi
+
+lefthook install
+
+case "$stack" in
+  gcp)
+    gcloud auth login
+    gcloud config set project kanade0404
+    gcloud auth application-default login
+    gcloud auth application-default set-quota-project kanade0404
+    terraform -chdir=gcp init
+    ;;
+  grafana)
+    gcloud auth application-default login
+    tofu -chdir=grafana init
+    ;;
+  aws)
+    profiles=(management-admin)
+    if [[ "$environment" != management ]]; then
+      profiles+=("${environment}-admin")
+    fi
+    sessions=("")
+    for profile in "${profiles[@]}"; do
+      session="$(aws configure get sso_session --profile "$profile" || true)"
+      start_url="$(aws configure get sso_start_url --profile "$profile" || true)"
+      if [[ -z "$session$start_url" ]]; then
+        aws configure sso --profile "$profile"
+        session="$(aws configure get sso_session --profile "$profile" || true)"
+      fi
+      logged_in=false
+      for existing in "${sessions[@]}"; do
+        if [[ -n "$session" && "$existing" == "$session" ]]; then
+          logged_in=true
+          break
+        fi
+      done
+      if [[ "$logged_in" == false ]]; then
+        aws sso login --profile "$profile"
+        sessions+=("$session")
+      fi
+      aws sts get-caller-identity --profile "$profile"
+    done
+    tofu -chdir="aws/environments/$environment" init
+    ;;
+esac

@@ -25,12 +25,11 @@ Grafana Cloud (kanade0404 個人スタック) のダッシュボード / リソ�
 
 - state は GCS バケット `gs://tfstate-kanade0404-terraform`（prefix `grafana`）に保存する。
 - CI (`github-actions@kanade0404.iam.gserviceaccount.com`) は Workload Identity Federation で認証し、当該バケットへの `roles/storage.objectAdmin` を保持している。
-- ローカルから `tofu plan` / `apply` する場合は、事前にホストで `gcloud auth application-default login` を実行しておくこと。実行すると `~/.config/gcloud/application_default_credentials.json` に Application Default Credentials (ADC) が生成され、`tofu` は追加設定なしでこの ADC を GCS backend の認証に使う。Docker コンテナを介さなくなったため、ADC ファイルのマウントや `GOOGLE_APPLICATION_CREDENTIALS` の指定は不要。
-- `make login`（旧 `terraform login`）は不要になったため廃止した。
+- ローカルから `tofu plan` / `apply` する場合は、事前にホストで `gcloud auth application-default login` を実行しておくこと。実行すると `~/.config/gcloud/application_default_credentials.json` に Application Default Credentials (ADC) が生成され、`tofu` は追加設定なしでこの ADC を GCS backend の認証に使う。ADC ファイルのマウントや `GOOGLE_APPLICATION_CREDENTIALS` の指定は不要。
 
 ## ツールチェーン (Nix)
 
-ツールはリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。OpenTofu 1.12.5 / gcloud SDK / jq などが devShell に入っている。Docker / docker-compose は使わない。
+ツールはリポジトリルートの **Nix flake**（`flake.nix` / `flake.lock` / `.envrc`）が提供する。OpenTofu 1.12.5 / gcloud SDK / jq などが devShell に入っている。
 
 ```sh
 # 初回のみ（リポジトリルートで）
@@ -49,22 +48,23 @@ export GRAFANA_AUTH=...                        # Service Account トークン (E
 
 ## Common commands
 
-All commands below run **from this `grafana/` directory** (`cd grafana` first)。`Makefile` は `tofu` の薄いラッパー。
+All commands below run **from this `grafana/` directory** (`cd grafana` first)。
 
 ```sh
-make format       # tofu fmt -recursive  +  tofu validate
-make plan         # tofu plan
-make apply        # tofu apply   (CI が master push で実行するのが基本)
-make init         # tofu init
+tofu fmt -recursive
+tofu validate
+tofu plan
+tofu apply        # CI が master push で実行するのが基本
+tofu init
 ```
 
-`tofu <…>` を直接実行しても同じ。
+初回は `tofu init` を先に実行する。
 
 ## CI/CD (GitHub Actions)
 
 - PR で `grafana/**` に変更があると plan ワークフローが走り、plan して結果を PR にコメントする。
 - `master` への push で apply ワークフローが走る。
-- GCP 用ワークフローとは別ファイルだが、GCS backend への認証は GCP と同じ Workload Identity Federation（`github-actions@kanade0404.iam.gserviceaccount.com`）を使う。Grafana provider 用に `GRAFANA_URL` / `GRAFANA_AUTH` の GitHub Secrets を別途参照する。GCP 用ワークフロー自体は変更しない。
+- GCP 用ワークフローとは別ファイルだが、GCS backend への認証は GCP と同じ Workload Identity Federation（`github-actions@kanade0404.iam.gserviceaccount.com`）を使う。Grafana provider 用に `GRAFANA_URL` / `GRAFANA_AUTH` の GitHub Secrets を別途参照する。
 
 ## ダッシュボード更新フロー
 

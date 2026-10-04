@@ -15,15 +15,15 @@
 #    gcloud は Docker コンテナ経由で実行する (gcp/CLAUDE.md 参照。gcp/ で実行):
 #
 #      echo -n "<Findy AI+ の Bearer トークン>" | \
-#        docker compose exec -T private_infra gcloud secrets versions add \
+#        gcloud secrets versions add \
 #        otel-collector-findy-token --project="$PROJECT_ID" --data-file=-
 #
 #      echo -n "<Grafana Cloud の instance_id:api_token を base64 したもの>" | \
-#        docker compose exec -T private_infra gcloud secrets versions add \
+#        gcloud secrets versions add \
 #        otel-collector-grafana-basic-auth --project="$PROJECT_ID" --data-file=-
 #
 #      echo -n "<Collector 受信側 (otlp receiver) の Bearer トークン>" | \
-#        docker compose exec -T private_infra gcloud secrets versions add \
+#        gcloud secrets versions add \
 #        otel-collector-receiver-token --project="$PROJECT_ID" --data-file=-
 #
 #    Grafana Cloud の Basic 認証値は以下で作成できる:
@@ -43,13 +43,13 @@
 #      Terraform 管理下の設定に差分は生じない。gcloud run services update は設定変更
 #      フラグなしでは "nothing to update" エラーになり新リビジョンを作らないので使わない):
 #
-#      docker compose exec -T private_infra gcloud run deploy otel-collector \
+#      gcloud run deploy otel-collector \
 #        --image="asia-northeast1-docker.pkg.dev/$PROJECT_ID/docker-hub-remote/otel/opentelemetry-collector-contrib:0.159.0" \
 #        --region=asia-northeast1 --project="$PROJECT_ID"
 #
 #      反映確認 (latestReadyRevisionName が更新されていることを確認する):
 #
-#      docker compose exec -T private_infra gcloud run services describe otel-collector \
+#      gcloud run services describe otel-collector \
 #        --region=asia-northeast1 --project="$PROJECT_ID" \
 #        --format='value(status.latestReadyRevisionName)'
 #
