@@ -64,7 +64,7 @@ jobs:
         run: terraform validate -no-color
 
       - name: tflint
-        uses: reviewdog/action-tflint@54a5e5aed57dcfbb4662ec548de876df33d6288d # v1.25.0
+        uses: reviewdog/action-tflint@8de8f6134bd8068970d7261f6b831964df82b92c # v1.29.0
         with:
           github_token: ${{ secrets.github_token }}
           working_directory: gcp
